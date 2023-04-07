@@ -149,8 +149,8 @@ class CFlushDecode(supportsFlushLine: Boolean, aluFn: ALUFN = ALUFN())(implicit 
   private def zapRs1(x: BitPat) = if (supportsFlushLine) x else BitPat(x.value.U)
 
   val table: Array[(BitPat, List[BitPat])] = Array(
-    zapRs1(CFLUSH_D_L1)->
-                List(Y,N,N,N,N,N,N,Y,A2_ZERO,A1_RS1, IMM_X, DW_XPR,aluFn.FN_ADD,   Y,M_FLUSH_ALL,N,N,N,N,N,N,N,CSR.I,N,N,N,N),
+    zapRs1(CFLUSH)->
+                List(Y,N,N,N,N,N,N,Y,N,N,N,N,A2_ZERO,A1_RS1, IMM_X, DW_XPR,aluFn.FN_ADD,   Y,M_FLUSH_ALL,N,N,N,N,N,N,N,CSR.I,N,N,N,N),
     zapRs1(CDISCARD_D_L1)->
                 List(Y,N,N,N,N,N,N,Y,A2_ZERO,A1_RS1, IMM_X, DW_XPR,aluFn.FN_ADD,   Y,M_FLUSH_ALL,N,N,N,N,N,N,N,CSR.I,N,N,N,N))
 }

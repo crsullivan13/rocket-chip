@@ -882,7 +882,7 @@ class CSRFile(
                                  WFI->         List(N,N,N,N,Y,N,N,N,N)) ++
     usingDebug.option(           DRET->        List(N,N,Y,N,N,N,N,N,N)) ++
     usingNMI.option(             MNRET->       List(N,N,Y,N,N,N,N,N,N)) ++
-    coreParams.haveCFlush.option(CFLUSH_D_L1-> List(N,N,N,N,N,N,N,N,N)) ++
+    coreParams.haveCFlush.option(CFLUSH->      List(N,N,N,N,N,N,N,N,N)) ++
     usingSupervisor.option(      SRET->        List(N,N,Y,N,N,N,N,N,N)) ++
     usingVM.option(              SFENCE_VMA->  List(N,N,N,N,N,Y,N,N,N)) ++
     usingHypervisor.option(      HFENCE_VVMA-> List(N,N,N,N,N,N,Y,N,N)) ++
