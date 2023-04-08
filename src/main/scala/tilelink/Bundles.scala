@@ -116,11 +116,12 @@ object TLPermissions
   def BtoN = 2.U(cWidth.W)
   def isShrink(x: UInt) = x <= BtoN
 
-  // Report types (ProbeAck, Release)
+  // Report types (ProbeAck, Release, SuperRelease)
   def TtoT = 3.U(cWidth.W)
   def BtoB = 4.U(cWidth.W)
   def NtoN = 5.U(cWidth.W)
-  def isReport(x: UInt) = x <= NtoN
+  def FLUSH = 6.U(cWidth.W)
+  def isReport(x: UInt) = x <= FLUSH
 
   def PermMsgGrow:Seq[String] = Seq("Grow NtoB", "Grow NtoT", "Grow BtoT")
   def PermMsgCap:Seq[String] = Seq("Cap toT", "Cap toB", "Cap toN")
