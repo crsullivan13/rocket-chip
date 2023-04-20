@@ -36,13 +36,14 @@ object TLMessages
   def ReleaseData    = 7.U     //               .              => ReleaseAck
   def Grant          = 4.U     //                    .         => GrantAck
   def GrantData      = 5.U     //                    .         => GrantAck
-  def ReleaseAck     = 6.U     //                    .
+  def ReleaseAck     = 6.U     //
+  def SuperReleaseAck = 7.U    //                    .
   def GrantAck       = 0.U     //                         .
 
   def isA(x: UInt) = x <= AcquirePerm
   def isB(x: UInt) = x <= Probe
   def isC(x: UInt) = x <= ReleaseData
-  def isD(x: UInt) = x <= ReleaseAck
+  def isD(x: UInt) = x <= SuperReleaseAck
 
   def adResponse = VecInit(AccessAck, AccessAck, AccessAckData, AccessAckData, AccessAckData, HintAck, Grant, Grant)
   def bcResponse = VecInit(AccessAck, AccessAck, AccessAckData, AccessAckData, AccessAckData, HintAck, ProbeAck, ProbeAck)
@@ -79,7 +80,8 @@ object TLMessages
                ("Invalid Opcode",TLPermissions.PermMsgReserved),
                ("Grant",TLPermissions.PermMsgCap),
                ("GrantData",TLPermissions.PermMsgCap),
-               ("ReleaseAck",TLPermissions.PermMsgReserved))
+               ("ReleaseAck",TLPermissions.PermMsgReserved),
+               ("SuperReleaseAck",TLPermissions.PermMsgReserved))
 
 }
 

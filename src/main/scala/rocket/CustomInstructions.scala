@@ -8,7 +8,7 @@ import chisel3.util._
 object CustomInstructions {
   def MNRET              = BitPat("b01110000001000000000000001110011")
   def CEASE              = BitPat("b00110000010100000000000001110011")
-  def CFLUSH             = BitPat("b111111000000?????000000001110011") //NOTE: in the context of rocket_chip this is CFLUSH_D_L1
+  def CFLUSH             = BitPat("b110011000000?????000000001110011") //NOTE: in the context of rocket_chip this is CFLUSH_D_L1
   def CDISCARD_D_L1      = BitPat("b111111000010?????000000001110011")
   def CUSTOM0            = BitPat("b?????????????????000?????0001011")
   def CUSTOM0_RS1        = BitPat("b?????????????????010?????0001011")

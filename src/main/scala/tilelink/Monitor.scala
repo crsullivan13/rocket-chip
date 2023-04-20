@@ -671,6 +671,7 @@ class TLMonitor(args: TLMonitorArgs, monitorDir: MonitorDirection = MonitorDirec
     d_sizes_clr.suggestName("d_sizes_clr")
 
     val d_release_ack = bundle.d.bits.opcode === TLMessages.ReleaseAck
+    val d_super_release_ack = bundle.d.bits.opcode === TLMessages.SuperReleaseAck
     when (bundle.d.valid && d_first && edge.isResponse(bundle.d.bits) && !d_release_ack) {
       d_clr_wo_ready := UIntToOH(bundle.d.bits.source)
     }
@@ -680,7 +681,7 @@ class TLMonitor(args: TLMonitorArgs, monitorDir: MonitorDirection = MonitorDirec
       d_opcodes_clr := size_to_numfullbits(1.U << log_a_opcode_bus_size.U) << (bundle.d.bits.source << log_a_opcode_bus_size.U)
       d_sizes_clr   := size_to_numfullbits(1.U << log_a_size_bus_size.U) << (bundle.d.bits.source << log_a_size_bus_size.U)
     }
-    when (bundle.d.valid && d_first && edge.isResponse(bundle.d.bits) && !d_release_ack) {
+    when (bundle.d.valid && d_first && edge.isResponse(bundle.d.bits) && !d_release_ack && !d_super_release_ack) {
       val same_cycle_resp = bundle.a.valid && a_first && edge.isRequest(bundle.a.bits) && (bundle.a.bits.source === bundle.d.bits.source)
       assume(((inflight)(bundle.d.bits.source)) || same_cycle_resp, "'D' channel acknowledged for nothing inflight" + extra)
 
