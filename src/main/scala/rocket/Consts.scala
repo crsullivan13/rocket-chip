@@ -76,7 +76,7 @@ trait MemoryOpConstants {
   def M_HFENCEV = "b10101".U // HFENCE.VVMA
   def M_HFENCEG = "b10110".U // HFENCE.GVMA
   def M_WOK     = "b10111".U // check write permissions but don't perform a write
-  def M_HLVX    = "b10000".U // HLVX instruction
+  def M_HLVX    = "b11000".U // HLVX instruction
 
   def isAMOLogical(cmd: UInt) = cmd.isOneOf(M_XA_SWAP, M_XA_XOR, M_XA_OR, M_XA_AND)
   def isAMOArithmetic(cmd: UInt) = cmd.isOneOf(M_XA_ADD, M_XA_MIN, M_XA_MAX, M_XA_MINU, M_XA_MAXU)
@@ -85,4 +85,5 @@ trait MemoryOpConstants {
   def isRead(cmd: UInt) = cmd.isOneOf(M_XRD, M_HLVX, M_XLR, M_XSC) || isAMO(cmd)
   def isWrite(cmd: UInt) = cmd === M_XWR || cmd === M_PWR || cmd === M_XSC || isAMO(cmd)
   def isWriteIntent(cmd: UInt) = isWrite(cmd) || cmd === M_PFW || cmd === M_XLR
+  def isFlush(cmd: UInt) = cmd === M_FLUSH || cmd === M_FLUSH_ALL
 }
