@@ -412,7 +412,7 @@ class TLEdgeOut(
   def Release(fromSource: UInt, toAddress: UInt, lgSize: UInt, shrinkPermissions: UInt, data: UInt): (Bool, TLBundleC) =
     Release(fromSource, toAddress, lgSize, shrinkPermissions, data, false.B)
 
-  def SuperRelease(fromSource: UInt, toAddress: UInt, lgSize: UInt): (Bool, TLBundleC) = {
+  def RootRelease(fromSource: UInt, toAddress: UInt, lgSize: UInt): (Bool, TLBundleC) = {
     require (manager.anySupportAcquireB, s"TileLink: No managers visible from this edge support Acquires, but one of these clients would try to request one: ${client.clients}")
     val legal = manager.supportsAcquireBFast(toAddress, lgSize)
     val c = Wire(new TLBundleC(bundle))
@@ -426,7 +426,7 @@ class TLEdgeOut(
     (legal, c)
   }
 
-  def SuperRelease(fromSource: UInt, toAddress: UInt, lgSize: UInt, data: UInt): (Bool, TLBundleC) = {
+  def RootRelease(fromSource: UInt, toAddress: UInt, lgSize: UInt, data: UInt): (Bool, TLBundleC) = {
     require (manager.anySupportAcquireB, s"TileLink: No managers visible from this edge support Acquires, but one of these clients would try to request one: ${client.clients}")
     val legal = manager.supportsAcquireBFast(toAddress, lgSize)
     val c = Wire(new TLBundleC(bundle))
