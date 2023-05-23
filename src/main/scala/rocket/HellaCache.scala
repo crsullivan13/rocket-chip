@@ -310,10 +310,13 @@ object L1Metadata {
   }
 }
 
-class L1MetaReadReq(implicit p: Parameters) extends L1HellaCacheBundle()(p) {
+class L1TagIdxReq(implicit p: Parameters) extends L1HellaCacheBundle()(p) {
   val idx    = UInt(idxBits.W)
-  val way_en = UInt(nWays.W)
   val tag    = UInt(tagBits.W)
+}
+
+class L1MetaReadReq(implicit p: Parameters) extends L1TagIdxReq {
+  val way_en = UInt(nWays.W)
 }
 
 class L1MetaWriteReq(implicit p: Parameters) extends L1MetaReadReq()(p) {
