@@ -440,6 +440,34 @@ class TLEdgeOut(
     (legal, c)
   }
 
+  def RootWb(fromSource: UInt, toAddress: UInt, lgSize: UInt): (Bool, TLBundleC) = {
+    require (manager.anySupportAcquireB, s"TileLink: No managers visible from this edge support Acquires, but one of these clients would try to request one: ${client.clients}")
+    val legal = manager.supportsAcquireBFast(toAddress, lgSize)
+    val c = Wire(new TLBundleC(bundle))
+    c.opcode  := TLMessages.ProbeAck
+    c.param   := TLPermissions.FLUSH_WB
+    c.size    := lgSize
+    c.source  := fromSource
+    c.address := toAddress
+    c.data    := UInt(0)
+    c.corrupt := Bool(false)
+    (legal, c)
+  }
+
+  def RootWb(fromSource: UInt, toAddress: UInt, lgSize: UInt, data: UInt): (Bool, TLBundleC) = {
+    require (manager.anySupportAcquireB, s"TileLink: No managers visible from this edge support Acquires, but one of these clients would try to request one: ${client.clients}")
+    val legal = manager.supportsAcquireBFast(toAddress, lgSize)
+    val c = Wire(new TLBundleC(bundle))
+    c.opcode  := TLMessages.ProbeAckData
+    c.param   := TLPermissions.FLUSH_WB
+    c.size    := lgSize
+    c.source  := fromSource
+    c.address := toAddress
+    c.data    := data
+    c.corrupt := Bool(false)
+    (legal, c)
+  }
+
   def ProbeAck(b: TLBundleB, reportPermissions: UInt): TLBundleC =
     ProbeAck(b.source, b.address, b.size, reportPermissions)
 

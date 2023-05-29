@@ -121,7 +121,8 @@ object TLPermissions
   def BtoB = 4.U(cWidth.W)
   def NtoN = 5.U(cWidth.W)
   def FLUSH = 6.U(cWidth.W)
-  def isReport(x: UInt) = x <= FLUSH
+  def FLUSH_WB = 7.U(cWidth.W)
+  def isReport(x: UInt) = x <= FLUSH_WB
 
   // ReleaseAck types (Standard, RootRelease)
   def RootRelease = 1.U(bdWidth.W)
