@@ -139,6 +139,7 @@ class ClientMetadata extends Bundle {
     import TLPermissions._
     MuxLookup(cmd, toN)(Seq(
       M_FLUSH   -> toN,
+      M_FLUSH_ALL -> toN,
       M_PRODUCE -> toB,
       M_CLEAN   -> toT))
   }
@@ -162,6 +163,6 @@ object ClientMetadata {
     meta
   }
   def onReset = ClientMetadata(ClientStates.Nothing)
-  def clean = ClientMetadata(ClientStates.Branch)
+  def clean = ClientMetadata(ClientStates.Trunk)
   def maximum = ClientMetadata(ClientStates.Dirty)
 }
