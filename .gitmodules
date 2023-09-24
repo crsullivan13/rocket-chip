@@ -1,6 +1,6 @@
 [submodule "hardfloat"]
-	path = hardfloat
+	path = dependencies/hardfloat
 	url = https://github.com/ucb-bar/berkeley-hardfloat.git
 [submodule "cde"]
-	path = cde
+	path = dependencies/cde
 	url = https://github.com/chipsalliance/cde.git
