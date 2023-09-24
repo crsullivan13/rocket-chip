@@ -4,6 +4,7 @@ import mill.scalalib.publish._
 import coursier.maven.MavenRepository
 import $file.dependencies.hardfloat.common
 import $file.dependencies.cde.common
+import $file.dependencies.rvdecoderdb.common
 import $file.common
 
 object v {
@@ -13,6 +14,8 @@ object v {
     "5.0.0" -> (ivy"org.chipsalliance::chisel:5.0.0", ivy"org.chipsalliance:::chisel-plugin:5.0.0"),
   )
   val mainargs = ivy"com.lihaoyi::mainargs:0.5.0"
+  val oslib = ivy"com.lihaoyi::os-lib:0.9.1"
+  val upickle = ivy"com.lihaoyi::upickle:3.1.3"
   val json4sJackson = ivy"org.json4s::json4s-jackson:4.0.5"
   val scalaReflect = ivy"org.scala-lang:scala-reflect:${scala}"
 }
@@ -61,6 +64,23 @@ trait CDE
   override def millSourcePath = os.pwd / "dependencies" / "cde" / "cde"
 }
 
+object rvdecoderdb extends RVDecoderDB
+
+trait RVDecoderDB
+  extends millbuild.dependencies.rvdecoderdb.common.RVDecoderDBJVMModule
+    with RocketChipPublishModule
+    with ScalaModule {
+
+  def scalaVersion: T[String] = T(v.scala)
+
+  def osLibIvy = v.oslib
+
+  def upickleIvy = v.upickle
+
+  override def millSourcePath = os.pwd / "dependencies" / "rvdecoderdb" / "rvdecoderdb"
+}
+
+
 object rocketchip extends Cross[RocketChip](v.chiselCrossVersions.keys.toSeq)
 
 trait RocketChip
@@ -85,6 +105,8 @@ trait RocketChip
   def hardfloatModule = hardfloat(crossValue)
 
   def cdeModule = cde
+
+  def rvdecoderdbModule = rvdecoderdb
 
   def mainargsIvy = v.mainargs
 
