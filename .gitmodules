@@ -10,3 +10,6 @@
 [submodule "dependencies/riscv-opcodes"]
 	path = dependencies/riscv-opcodes
 	url = https://github.com/riscv/riscv-opcodes.git
+[submodule "dependencies/chisel"]
+	path = dependencies/chisel
+	url = https://github.com/chipsalliance/chisel.git
