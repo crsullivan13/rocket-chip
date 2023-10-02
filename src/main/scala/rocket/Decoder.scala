@@ -127,18 +127,12 @@ class InstructionDecoder(p: InstructionDecoderParameter) {
   val table: DecodeTable[RocketDecodePattern] = new DecodeTable[RocketDecodePattern](
     instructionDecodePatterns,
     instructionDecodeFields
-  ) {
-    // FIXME: in Chisel
-    override val table: TruthTable = TruthTable(
-      instructionDecodePatterns.map(op =>op.bitPat -> instructionDecodeFields.reverse.map(_.genTable(op)).reduce(_ ## _)),
-      instructionDecodeFields.reverse.map(_.dc).reduce(_ ## _)
-    )
-  }
+  )
 
   object isLegal extends BoolDecodeField[RocketDecodePattern] {
     override def name: String = "legal"
 
-    override def dc: BitPat = n
+    override def default: BitPat = n
 
     // should always be true
     override def genTable(op: RocketDecodePattern): BitPat = y
@@ -296,6 +290,8 @@ class InstructionDecoder(p: InstructionDecoderParameter) {
 
   object mem extends BoolDecodeField[RocketDecodePattern] {
     override def name: String = "mem"
+
+    override def default: BitPat = n
 
     override def genTable(op: RocketDecodePattern): BitPat = {
       op.instruction.name match {
