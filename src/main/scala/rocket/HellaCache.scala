@@ -231,9 +231,7 @@ class HellaCacheBundle(val outer: HellaCache)(implicit p: Parameters) extends Co
   val cpu = Flipped((new HellaCacheIO))
   val ptw = new TLBPTWIO()
   val errors = new DCacheErrors
-
-  //bru
-  val nThrottleWb = Bool(INPUT)
+  //val nThrottleWb = Bool(INPUT)
 }
 
 class HellaCacheModule(outer: HellaCache) extends LazyModuleImp(outer)

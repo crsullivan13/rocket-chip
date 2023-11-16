@@ -29,7 +29,7 @@ class BwRegulator(address: BigInt) (implicit p: Parameters) extends LazyModule
       val nThrottleWb = Output(Vec(n, Bool()))
     })
 
-    val memBase = p(ExtMem).get.base.U
+    val memBase = p(ExtMem).get.master.base.U
     val wPeriod = 25 // for max 10ms period, F = 2.13GHz
     val w = wPeriod - 3 // it can count up to a transaction per 8 cycles when window size is set to max
     val nDomains = n
