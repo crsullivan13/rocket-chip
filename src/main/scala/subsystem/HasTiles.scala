@@ -254,8 +254,8 @@ trait CanAttachTile {
   }
 
   /** A default set of connections that need to occur for most tile types */
-  def connect(domain: TilePRCIDomain[TileType], context: TileContextType): Unit = {
-    connectMasterPorts(domain, context)
+  def connect(domain: TilePRCIDomain[TileType], context: TileContextType, bwReg: BwRegulator): Unit = {
+    connectMasterPorts(domain, context, bwReg)
     connectSlavePorts(domain, context)
     connectInterrupts(domain, context)
     connectPRC(domain, context)
@@ -264,15 +264,11 @@ trait CanAttachTile {
   }
 
   /** Connect the port where the tile is the master to a TileLink interconnect. */
-  def connectMasterPorts(domain: TilePRCIDomain[TileType], context: Attachable): Unit = {
+  def connectMasterPorts(domain: TilePRCIDomain[TileType], context: Attachable, bwReg: BwRegulator): Unit = {
     implicit val p = context.p
     val dataBus = context.locateTLBusWrapper(crossingParams.master.where)
-    val bwReg = LazyModule(new BwRegulator)
-    bwReg.coupleFrom(tileParams.name.getOrElse("tile")) { bus =>
-      bus :=* crossingParams.master.injectNode(context) :=* domain.crossMasterPort(crossingParams.crossingType)
-    }
     dataBus.coupleFrom(tileParams.name.getOrElse("tile")) { bus =>
-      bus :=* bwReg.node
+     bus := bwReg.node :=* crossingParams.master.injectNode(context) :=* domain.crossMasterPort(crossingParams.crossingType)
     }
   }
 
@@ -439,8 +435,8 @@ trait HasTiles extends InstantiatesTiles with HasCoreMonitorBundles with Default
 
   // connect all the tiles to interconnect attachment points made available in this subsystem context
   tileAttachParams.zip(tile_prci_domains).foreach { case (params, td) =>
-    params.connect(td.asInstanceOf[TilePRCIDomain[params.TileType]], this.asInstanceOf[params.TileContextType])
-  }
+      params.connect(td.asInstanceOf[TilePRCIDomain[params.TileType]], this.asInstanceOf[params.TileContextType], bwReg)
+        }
 }
 
 /** Provides some Chisel connectivity to certain tile IOs */
@@ -464,5 +460,5 @@ trait HasTilesModuleImp extends LazyModuleImp {
   }
   val nmi = outer.tiles.zip(outer.tileNMIIONodes).zipWithIndex.map { case ((tile, n), i) => tile.tileParams.core.useNMI.option(n.makeIO(s"nmi_$i")) }
 
-  //val BRU = outer.tiles.zip(outer.bwReg.module.io.nThrottleWb).zipWithIndex.map { case(tile.asInstanceOf(BoomTile), i) => tile.dc }
+  //outer.tiles.zip(outer.bwReg.module.io.nThrottleWb).map { case(tile, nThrottleWb) => tile. }
 }

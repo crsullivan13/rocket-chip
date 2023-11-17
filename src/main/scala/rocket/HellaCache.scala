@@ -155,11 +155,6 @@ class HellaCachePerfEvents extends Bundle {
   val grant = Bool()
   val tlbMiss = Bool()
 
-  //bru
-  val acquireT = Bool()
-  val releaseData = Bool()
-  val probeAckData = Bool()
-
   val blocked = Bool()
   val canAcceptStoreThenLoad = Bool()
   val canAcceptStoreThenRMW = Bool()
@@ -279,16 +274,10 @@ trait HasHellaCache { this: BaseTile =>
   var nDCachePorts = 0
   lazy val dcache: HellaCache = LazyModule(p(BuildHellaCache)(this)(p))
 
-  tlMasterXbar.node := TLWidthWidget(tileParams.dcache.get.rowBits/8) := dcache.node
+  tlMasterXbar.node := dcache.node
   dcache.hartIdSinkNodeOpt.map { _ := hartIdNexusNode }
   // dcache.ThrottleWbSinkNodeOpt.map { _ := ThrottleWbNexusNode }
   dcache.mmioAddressPrefixSinkNodeOpt.map { _ := mmioAddressPrefixNexusNode }
-  InModuleBody {
-    dcache.module match {
-      case module: DCacheModule => module.tlb_port := DontCare
-      case other => other
-    }
-  }
 }
 
 trait HasHellaCacheModule {

@@ -2,11 +2,13 @@ package freechips.rocketchip.subsystem
 
 import chisel3._
 import chisel3.util._
-import freechips.rocketchip.config._
+//import freechips.rocketchip.config._
+import org.chipsalliance.cde.config.{Parameters}
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.tilelink._
 import freechips.rocketchip.regmapper._
-import midas.targetutils._
+import midas.targetutils.SynthesizePrintf
+//import midas.targetutils._
 
 class BwRegulator(address: BigInt) (implicit p: Parameters) extends LazyModule
 {
@@ -94,7 +96,7 @@ class BwRegulator(address: BigInt) (implicit p: Parameters) extends LazyModule
       // ReleaseData or ProbeAckData cause a PutFull in Broadcast Hub
       val cIsWb = in.c.bits.opcode === TLMessages.ReleaseData || in.c.bits.opcode === TLMessages.ProbeAckData
 
-      coreAccActive(i) := bwREnables(i) && out.a.fire() && (aIsAcquire || aIsInstFetch && countInstFetch)
+      coreAccActive(i) := bwREnables(i) && out.a.fire && (aIsAcquire || aIsInstFetch && countInstFetch)
       coreWbActive(i) := bwREnables(i) && edge_out.done(out.c) && cIsWb
 
       out <> in
@@ -114,10 +116,10 @@ class BwRegulator(address: BigInt) (implicit p: Parameters) extends LazyModule
       clientNames(i) = edge_in.client.clients(0).name + ", " + edge_in.client.clients(2).name
 
       when (perfPeriodCntrReset && perfEnable) {
-        printf(SynthesizePrintf("%d %d %d %d\n", cycle, i.U, aCounters(i), cCounters(i)))
+        //SynthesizePrintf(printf(s"%d %d %d %d\n", cycle, i.U, aCounters(i), cCounters(i)))
       }
       aCounters(i) := Mux(perfEnable,
-        (out.a.fire() && (aIsAcquire || aIsInstFetch)) + Mux(perfPeriodCntrReset, 0.U, aCounters(i)), 0.U)
+        (out.a.fire && (aIsAcquire || aIsInstFetch)) + Mux(perfPeriodCntrReset, 0.U, aCounters(i)), 0.U)
       cCounters(i) := Mux(perfEnable,
         (edge_out.done(out.c) && cIsWb) + Mux(perfPeriodCntrReset, 0.U, cCounters(i)), 0.U)
     }

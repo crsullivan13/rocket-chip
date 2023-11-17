@@ -38,18 +38,9 @@ class SystemBus(params: SystemBusParams, name: String = "system_bus")(implicit p
   }
 
   private val system_bus_xbar = LazyModule(new TLXbar(policy = params.policy))
-
-  //bru
-  //val bwRegulator = LazyModule(new BwRegulator)
-
   val inwardNode: TLInwardNode = system_bus_xbar.node :=* TLFIFOFixer(TLFIFOFixer.allVolatile) :=* replicator.map(_.node).getOrElse(TLTempNode())
   val outwardNode: TLOutwardNode = system_bus_xbar.node
-
   def busView: TLEdge = system_bus_xbar.node.edges.in.head
-
-  //bwRegulator.node :=* TLBuffer(buffer) :=* TLFIFOFixer(TLFIFOFixer.allUncacheable) :=* gen
-  //master_splitter.node := bwRegulator.node
-
 
   val builtInDevices: BuiltInDevices = BuiltInDevices.attach(params, outwardNode)
 }
