@@ -434,6 +434,9 @@ trait HasTiles extends InstantiatesTiles with HasCoreMonitorBundles with Default
 { this: BaseSubsystem => // TODO: ideally this bound would be softened to Attachable
   implicit val p: Parameters
 
+  val bwReg = LazyModule(new BwRegulator(0x20000000L)(p))
+  pbus.coupleTo("BRU") { bwReg.regnode := TLFragmenter(pbus.beatBytes, pbus.blockBytes) := _ }
+
   // connect all the tiles to interconnect attachment points made available in this subsystem context
   tileAttachParams.zip(tile_prci_domains).foreach { case (params, td) =>
     params.connect(td.asInstanceOf[TilePRCIDomain[params.TileType]], this.asInstanceOf[params.TileContextType])
@@ -460,4 +463,6 @@ trait HasTilesModuleImp extends LazyModuleImp {
     }
   }
   val nmi = outer.tiles.zip(outer.tileNMIIONodes).zipWithIndex.map { case ((tile, n), i) => tile.tileParams.core.useNMI.option(n.makeIO(s"nmi_$i")) }
+
+  //val BRU = outer.tiles.zip(outer.bwReg.module.io.nThrottleWb).zipWithIndex.map { case(tile.asInstanceOf(BoomTile), i) => tile.dc }
 }

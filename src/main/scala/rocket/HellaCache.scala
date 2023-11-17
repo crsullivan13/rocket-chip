@@ -156,9 +156,9 @@ class HellaCachePerfEvents extends Bundle {
   val tlbMiss = Bool()
 
   //bru
-  // val acquireT = Bool()
-  // val releaseData = Bool()
-  // val probeAckData = Bool()
+  val acquireT = Bool()
+  val releaseData = Bool()
+  val probeAckData = Bool()
 
   val blocked = Bool()
   val canAcceptStoreThenLoad = Bool()
@@ -234,7 +234,6 @@ class HellaCacheBundle(val outer: HellaCache)(implicit p: Parameters) extends Co
   val errors = new DCacheErrors
 
   //bru
-  //incorrect method here I believe
   //val nThrottleWb = Bool(INPUT)
 }
 
