@@ -267,8 +267,12 @@ trait CanAttachTile {
   def connectMasterPorts(domain: TilePRCIDomain[TileType], context: Attachable): Unit = {
     implicit val p = context.p
     val dataBus = context.locateTLBusWrapper(crossingParams.master.where)
-    dataBus.coupleFrom(tileParams.name.getOrElse("tile")) { bus =>
+    val bwReg = LazyModule(new BwRegulator)
+    bwReg.coupleFrom(tileParams.name.getOrElse("tile")) { bus =>
       bus :=* crossingParams.master.injectNode(context) :=* domain.crossMasterPort(crossingParams.crossingType)
+    }
+    dataBus.coupleFrom(tileParams.name.getOrElse("tile")) { bus =>
+      bus :=* bwReg.node
     }
   }
 

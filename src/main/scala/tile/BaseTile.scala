@@ -239,6 +239,12 @@ abstract class BaseTile private (val crossing: ClockCrossingType, q: Parameters)
   val hartIdNode: BundleBridgeInwardNode[UInt] =
     hartIdSinkNode := hartIdNexusNode := BundleBridgeNameNode("hartid")
 
+  //bru ThrottleWb Node
+  // val ThrottleWbNexusNode: BundleBridgeNode[UInt] = BundleBroadcast[UInt](registered = p(InsertTimingClosureRegistersOnHartIds)) //obviously this param is wrong
+  // val ThrottleWbSinkNode = BundleBridgeSink[UInt]()
+  // val ThrottleWbNode: BundleBridgeInwardNode[UInt] =
+  //   ThrottleWbSinkNode := ThrottleWbNexusNode := BundleBridgeNameNode("throttleWb")
+
   /** Node for broadcasting a reset vector to diplomatic consumers within the tile. */
   val resetVectorNexusNode: BundleBridgeNode[UInt] = BundleBroadcast[UInt]()
 

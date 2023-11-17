@@ -156,9 +156,9 @@ class HellaCachePerfEvents extends Bundle {
   val tlbMiss = Bool()
 
   //bru
-  val acquireT = Bool()
-  val releaseData = Bool()
-  val probeAckData = Bool()
+  // val acquireT = Bool()
+  // val releaseData = Bool()
+  // val probeAckData = Bool()
 
   val blocked = Bool()
   val canAcceptStoreThenLoad = Bool()
@@ -216,6 +216,7 @@ abstract class HellaCache(staticIdForMetadataUseOnly: Int)(implicit p: Parameter
     requestFields = tileParams.core.useVM.option(Seq()).getOrElse(Seq(AMBAProtField())))))
 
   val hartIdSinkNodeOpt = cfg.scratch.map(_ => BundleBridgeSink[UInt]())
+  // val ThrottleWbSinkNodeOpt = cfg.scratch.map(_ => BundleBridgeSink[UInt]())
   val mmioAddressPrefixSinkNodeOpt = cfg.scratch.map(_ => BundleBridgeSink[UInt]())
 
   val module: HellaCacheModule
@@ -233,7 +234,8 @@ class HellaCacheBundle(val outer: HellaCache)(implicit p: Parameters) extends Co
   val errors = new DCacheErrors
 
   //bru
-  val nThrottleWb = Bool(INPUT)
+  //incorrect method here I believe
+  //val nThrottleWb = Bool(INPUT)
 }
 
 class HellaCacheModule(outer: HellaCache) extends LazyModuleImp(outer)
@@ -242,6 +244,7 @@ class HellaCacheModule(outer: HellaCache) extends LazyModuleImp(outer)
   val (tl_out, _) = outer.node.out(0)
   val io = IO(new HellaCacheBundle(outer))
   val io_hartid = outer.hartIdSinkNodeOpt.map(_.bundle)
+  // val io_throttleWb = outer.ThrottleWbSinkNodeOpt.map(_.bundle)
   val io_mmio_address_prefix = outer.mmioAddressPrefixSinkNodeOpt.map(_.bundle)
   dontTouch(io.cpu.resp) // Users like to monitor these fields even if the core ignores some signals
   dontTouch(io.cpu.s1_data)
@@ -279,6 +282,7 @@ trait HasHellaCache { this: BaseTile =>
 
   tlMasterXbar.node := TLWidthWidget(tileParams.dcache.get.rowBits/8) := dcache.node
   dcache.hartIdSinkNodeOpt.map { _ := hartIdNexusNode }
+  // dcache.ThrottleWbSinkNodeOpt.map { _ := ThrottleWbNexusNode }
   dcache.mmioAddressPrefixSinkNodeOpt.map { _ := mmioAddressPrefixNexusNode }
   InModuleBody {
     dcache.module match {
