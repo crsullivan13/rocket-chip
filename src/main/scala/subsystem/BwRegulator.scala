@@ -39,7 +39,7 @@ class BwRegulator(address: BigInt) (implicit p: Parameters) extends LazyModule
 
     val enBRUGlobal = RegInit(false.B)
     val countInstFetch = RegInit(true.B)
-    val enWbThrottle = RegInit(true.B)
+    val enWbThrottle = RegInit(false.B)
     val periodCntr = Reg(UInt(wPeriod.W))
     val periodLen = Reg(UInt(wPeriod.W))
     val accCntrs = Reg(Vec(nDomains, UInt(w.W)))
@@ -86,7 +86,7 @@ class BwRegulator(address: BigInt) (implicit p: Parameters) extends LazyModule
       throttleDomainWb(i) := wbCntrs(i) >= maxWbs(i)
     }
 
-    // generator loop for cores
+    //generator loop for cores
     for (i <- 0 until n) {
       val (out, edge_out) = node.out(i)
       val (in, edge_in) = node.in(i)
@@ -100,7 +100,7 @@ class BwRegulator(address: BigInt) (implicit p: Parameters) extends LazyModule
       coreWbActive(i) := bwREnables(i) && edge_out.done(out.c) && cIsWb
 
       out <> in
-      io.nThrottleWb(i) := true.B
+      io.nThrottleWb(i) := false.B
 
       when (enBRUGlobal && bwREnables(i)) {
         when (throttleDomain(domainIds(i))) {
@@ -108,7 +108,7 @@ class BwRegulator(address: BigInt) (implicit p: Parameters) extends LazyModule
           in.a.ready := false.B
         }
         when (throttleDomainWb(domainIds(i)) && enWbThrottle) {
-          io.nThrottleWb(i) := false.B
+          io.nThrottleWb(i) := true.B
         }
       }
 

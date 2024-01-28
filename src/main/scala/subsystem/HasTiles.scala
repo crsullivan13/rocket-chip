@@ -254,8 +254,8 @@ trait CanAttachTile {
   }
 
   /** A default set of connections that need to occur for most tile types */
-  def connect(domain: TilePRCIDomain[TileType], context: TileContextType, bwReg: BwRegulator): Unit = {
-    connectMasterPorts(domain, context, bwReg)
+  def connect(domain: TilePRCIDomain[TileType], context: TileContextType, bru: BwRegulator): Unit = {
+    connectMasterPorts(domain, context, bru)
     connectSlavePorts(domain, context)
     connectInterrupts(domain, context)
     connectPRC(domain, context)
@@ -264,11 +264,11 @@ trait CanAttachTile {
   }
 
   /** Connect the port where the tile is the master to a TileLink interconnect. */
-  def connectMasterPorts(domain: TilePRCIDomain[TileType], context: Attachable, bwReg: BwRegulator): Unit = {
+  def connectMasterPorts(domain: TilePRCIDomain[TileType], context: Attachable, bru: BwRegulator): Unit = {
     implicit val p = context.p
     val dataBus = context.locateTLBusWrapper(crossingParams.master.where)
     dataBus.coupleFrom(tileParams.name.getOrElse("tile")) { bus =>
-     bus := bwReg.node :=* crossingParams.master.injectNode(context) :=* domain.crossMasterPort(crossingParams.crossingType)
+      bus := bru.node :=* crossingParams.master.injectNode(context) :=* domain.crossMasterPort(crossingParams.crossingType)
     }
   }
 
@@ -431,12 +431,13 @@ trait HasTiles extends InstantiatesTiles with HasCoreMonitorBundles with Default
   implicit val p: Parameters
 
   val bwReg = LazyModule(new BwRegulator(0x20000000L)(p))
-  pbus.coupleTo("BRU") { bwReg.regnode := TLFragmenter(pbus.beatBytes, pbus.blockBytes) := _ }
+  pbus.coupleTo("bru") { bwReg.regnode := TLFragmenter(pbus.beatBytes, pbus.blockBytes) := _ }
 
   // connect all the tiles to interconnect attachment points made available in this subsystem context
-  tileAttachParams.zip(tile_prci_domains).foreach { case (params, td) =>
+  tileAttachParams.zip(tile_prci_domains).foreach { case (params, td) => {
       params.connect(td.asInstanceOf[TilePRCIDomain[params.TileType]], this.asInstanceOf[params.TileContextType], bwReg)
-        }
+    }
+  }
 }
 
 /** Provides some Chisel connectivity to certain tile IOs */
