@@ -138,6 +138,15 @@ trait HasTileInterruptSources
   * They need to be instantiated before tiles are attached within the subsystem containing them.
   */
 trait HasTileInputConstants extends InstantiatesTiles { this: BaseSubsystem =>
+
+  val tilenThrottleWbNode = BundleBridgeEphemeralNode[Bool]()
+  val tilenThrottleWbIONodes : Seq[BundleBridgeSource[Bool]] =
+    Seq.fill(tiles.size) {
+      val nThrottleWbVectorSource = BundleBridgeSource[Bool]()
+      tilenThrottleWbNode := nThrottleWbVectorSource
+      nThrottleWbVectorSource
+    }
+
   /** tileHartIdNode is used to collect publishers and subscribers of hartids. */
   val tileHartIdNode = BundleBridgeEphemeralNode[UInt]()
 
@@ -345,6 +354,7 @@ trait CanAttachTile {
     val tlBusToGetPrefixFrom = context.locateTLBusWrapper(crossingParams.mmioBaseAddressPrefixWhere)
     domain.tile.hartIdNode := context.tileHartIdNode
     domain.tile.resetVectorNode := context.tileResetVectorNode
+    domain.tile.nThrottleWbNode := context.tilenThrottleWbNode
     tlBusToGetPrefixFrom.prefixNode.foreach { domain.tile.mmioAddressPrefixNode := _ }
   }
 
@@ -430,12 +440,12 @@ trait HasTiles extends InstantiatesTiles with HasCoreMonitorBundles with Default
 { this: BaseSubsystem => // TODO: ideally this bound would be softened to Attachable
   implicit val p: Parameters
 
-  val bwReg = LazyModule(new BwRegulator(0x20000000L)(p))
-  pbus.coupleTo("bru") { bwReg.regnode := TLFragmenter(pbus.beatBytes, pbus.blockBytes) := _ }
+  val BwRegulator = LazyModule(new BwRegulator(0x20000000L)(p))
+  pbus.coupleTo("bru") { BwRegulator.regnode := TLFragmenter(pbus.beatBytes, pbus.blockBytes) := _ }
 
   // connect all the tiles to interconnect attachment points made available in this subsystem context
   tileAttachParams.zip(tile_prci_domains).foreach { case (params, td) => {
-      params.connect(td.asInstanceOf[TilePRCIDomain[params.TileType]], this.asInstanceOf[params.TileContextType], bwReg)
+      params.connect(td.asInstanceOf[TilePRCIDomain[params.TileType]], this.asInstanceOf[params.TileContextType], BwRegulator)
     }
   }
 }
@@ -461,5 +471,5 @@ trait HasTilesModuleImp extends LazyModuleImp {
   }
   val nmi = outer.tiles.zip(outer.tileNMIIONodes).zipWithIndex.map { case ((tile, n), i) => tile.tileParams.core.useNMI.option(n.makeIO(s"nmi_$i")) }
 
-  //outer.tiles.zip(outer.bwReg.module.io.nThrottleWb).map { case(tile, nThrottleWb) => tile. }
+  val bru_throttlewb = (outer.tilenThrottleWbIONodes).zip(outer.BwRegulator.io.nThrottleWb).map { case(n, i) => n.makeIO(s"bru_throttlewb_$i") }
 }
