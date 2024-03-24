@@ -517,5 +517,5 @@ trait HasTilesModuleImp extends LazyModuleImp {
   }
   val nmi = outer.tiles.zip(outer.tileNMIIONodes).zipWithIndex.map { case ((tile, n), i) => tile.tileParams.core.useNMI.option(n.makeIO(s"nmi_$i")) }
 
-  val bru_throttlewb = (outer.tilenThrottleWbIONodes).zip(outer.BwRegulator.io.nThrottleWb).map { case(n, i) => n.makeIO(s"bru_throttlewb_$i") }
+  //val bru_throttlewb = (outer.tilenThrottleWbIONodes).zip(outer.BwRegulator.io.nThrottleWb).map { case(n, i) => n.makeIO(s"bru_throttlewb_$i") }
 }
