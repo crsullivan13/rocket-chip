@@ -12,6 +12,7 @@ import freechips.rocketchip.tile._
 import freechips.rocketchip.tilelink._
 import freechips.rocketchip.prci.{ClockGroup, ResetCrossingType, ClockGroupNode}
 import freechips.rocketchip.util._
+import freechips.rocketchip.subsystem
 
 /** Entry point for Config-uring the presence of Tiles */
 case class TilesLocated(loc: HierarchicalLocation) extends Field[Seq[CanAttachTile]](Nil)
@@ -254,8 +255,8 @@ trait CanAttachTile {
   }
 
   /** A default set of connections that need to occur for most tile types */
-  def connect(domain: TilePRCIDomain[TileType], context: TileContextType, bru: BwRegulator): Unit = {
-    connectMasterPorts(domain, context, bru)
+  def connect(domain: TilePRCIDomain[TileType], context: TileContextType): Unit = {
+    connectMasterPorts(domain, context)
     connectSlavePorts(domain, context)
     connectInterrupts(domain, context)
     connectPRC(domain, context)
@@ -263,12 +264,52 @@ trait CanAttachTile {
     connectInputConstants(domain, context)
   }
 
+  def connectBru(domain: TilePRCIDomain[TileType], context: TileContextType, bru: Option[BwRegulator], finalConnection: Boolean): Unit = {
+    bru match {
+      case Some(bru) => {
+        connectMasterPortsBru(domain, context, bru)
+      }
+      case None => {
+        connectMasterPorts(domain, context)
+      }
+    }
+    connectSlavePorts(domain, context)
+    connectInterrupts(domain, context)
+    connectPRC(domain, context)
+    connectOutputNotifications(domain, context)
+    connectInputConstants(domain, context)
+    if ( finalConnection ) {
+      bru match {
+        case Some(bru) => {
+          connectBruSbus(context, bru)
+        }
+        case None => None
+      }
+    }
+  }
+
   /** Connect the port where the tile is the master to a TileLink interconnect. */
-  def connectMasterPorts(domain: TilePRCIDomain[TileType], context: Attachable, bru: BwRegulator): Unit = {
+  def connectMasterPorts(domain: TilePRCIDomain[TileType], context: Attachable): Unit = {
     implicit val p = context.p
     val dataBus = context.locateTLBusWrapper(crossingParams.master.where)
     dataBus.coupleFrom(tileParams.name.getOrElse("tile")) { bus =>
-      bus := bru.node :=* crossingParams.master.injectNode(context) :=* domain.crossMasterPort(crossingParams.crossingType)
+      bus :=* crossingParams.master.injectNode(context) :=* domain.crossMasterPort(crossingParams.crossingType)
+    }
+  }
+
+  def connectBruSbus(context: Attachable, bru: BwRegulator): Unit = {
+    implicit val p = context.p
+    val dataBus = context.locateTLBusWrapper(crossingParams.master.where)
+    dataBus.coupleFrom(tileParams.name.getOrElse("tile")) { bus =>
+      bus :=* bru.node  
+    }
+  }
+
+  def connectMasterPortsBru(domain: TilePRCIDomain[TileType], context: Attachable, bru: BwRegulator): Unit = {
+    implicit val p = context.p
+    val dataBus = context.locateTLBusWrapper(crossingParams.master.where)
+    dataBus.coupleFrom(tileParams.name.getOrElse("tile")) { bus =>
+      bru.node :=* crossingParams.master.injectNode(context) :=* domain.crossMasterPort(crossingParams.crossingType)
     }
   }
 
@@ -346,6 +387,7 @@ trait CanAttachTile {
     domain.tile.hartIdNode := context.tileHartIdNode
     domain.tile.resetVectorNode := context.tileResetVectorNode
     tlBusToGetPrefixFrom.prefixNode.foreach { domain.tile.mmioAddressPrefixNode := _ }
+    //domain.tile.nThrottleWbNode := context.tileNWbInhibitNode
   }
 
   /** Connect power/reset/clock resources. */
@@ -426,16 +468,20 @@ trait InstantiatesTiles { this: BaseSubsystem =>
 }
 
 /** HasTiles instantiates and also connects a Config-urable sequence of tiles of any type to subsystem interconnect resources. */
-trait HasTiles extends InstantiatesTiles with HasCoreMonitorBundles with DefaultTileContextType
+trait HasTiles extends InstantiatesTiles with HasCoreMonitorBundles with DefaultTileContextType with CanHavePeripheryBRU
 { this: BaseSubsystem => // TODO: ideally this bound would be softened to Attachable
   implicit val p: Parameters
 
-  val bwReg = LazyModule(new BwRegulator(0x20000000L)(p))
-  pbus.coupleTo("bru") { bwReg.regnode := TLFragmenter(pbus.beatBytes, pbus.blockBytes) := _ }
-
   // connect all the tiles to interconnect attachment points made available in this subsystem context
-  tileAttachParams.zip(tile_prci_domains).foreach { case (params, td) => {
-      params.connect(td.asInstanceOf[TilePRCIDomain[params.TileType]], this.asInstanceOf[params.TileContextType], bwReg)
+  tileAttachParams.zip(tile_prci_domains).zipWithIndex.foreach { case ((params, td), i) => {
+      p(BRUKey) match {
+        case Some(_) => {
+          params.connectBru(td.asInstanceOf[TilePRCIDomain[params.TileType]], this.asInstanceOf[params.TileContextType], BwRegulator, (tileAttachParams.size-1) == i)
+        }
+        case None => {
+          params.connect(td.asInstanceOf[TilePRCIDomain[params.TileType]], this.asInstanceOf[params.TileContextType])
+        }
+      }
     }
   }
 }
@@ -460,6 +506,4 @@ trait HasTilesModuleImp extends LazyModuleImp {
     }
   }
   val nmi = outer.tiles.zip(outer.tileNMIIONodes).zipWithIndex.map { case ((tile, n), i) => tile.tileParams.core.useNMI.option(n.makeIO(s"nmi_$i")) }
-
-  //outer.tiles.zip(outer.bwReg.module.io.nThrottleWb).map { case(tile, nThrottleWb) => tile. }
 }
