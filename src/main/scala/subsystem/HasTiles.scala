@@ -139,6 +139,15 @@ trait HasTileInterruptSources
   * They need to be instantiated before tiles are attached within the subsystem containing them.
   */
 trait HasTileInputConstants extends InstantiatesTiles { this: BaseSubsystem =>
+
+  val tilenThrottleWbNode = BundleBridgeEphemeralNode[Bool]()
+  val tilenThrottleWbIONodes : Seq[BundleBridgeSource[Bool]] =
+    Seq.fill(tiles.size) {
+      val nThrottleWbVectorSource = BundleBridgeSource[Bool]()
+      tilenThrottleWbNode := nThrottleWbVectorSource
+      nThrottleWbVectorSource
+    }
+
   /** tileHartIdNode is used to collect publishers and subscribers of hartids. */
   val tileHartIdNode = BundleBridgeEphemeralNode[UInt]()
 
@@ -386,6 +395,7 @@ trait CanAttachTile {
     val tlBusToGetPrefixFrom = context.locateTLBusWrapper(crossingParams.mmioBaseAddressPrefixWhere)
     domain.tile.hartIdNode := context.tileHartIdNode
     domain.tile.resetVectorNode := context.tileResetVectorNode
+    domain.tile.nThrottleWbNode := context.tilenThrottleWbNode
     tlBusToGetPrefixFrom.prefixNode.foreach { domain.tile.mmioAddressPrefixNode := _ }
     //domain.tile.nThrottleWbNode := context.tileNWbInhibitNode
   }
@@ -506,4 +516,6 @@ trait HasTilesModuleImp extends LazyModuleImp {
     }
   }
   val nmi = outer.tiles.zip(outer.tileNMIIONodes).zipWithIndex.map { case ((tile, n), i) => tile.tileParams.core.useNMI.option(n.makeIO(s"nmi_$i")) }
+
+  val bru_throttlewb = (outer.tilenThrottleWbIONodes).zip(outer.BwRegulator.io.nThrottleWb).map { case(n, i) => n.makeIO(s"bru_throttlewb_$i") }
 }

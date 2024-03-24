@@ -230,9 +230,11 @@ abstract class BaseTile private (val crossing: ClockCrossingType, q: Parameters)
   /** Node for consuming the hart id input in tile-layer Chisel logic. */
   val hartIdSinkNode = BundleBridgeSink[UInt]()
 
-  // val nThrottleWbNexusNode: BundleBridgeNode[Bool] = BundleBroadcast[Bool]()
-  // val nThrottleWbSinkNode = BundleBridgeSink[Bool]()
-  // val nThrottleWbNode: BundleBridgeInwardNode[Bool] = nThrottleWbSinkNode := nThrottleWbNexusNode : BundleBridgeNameNode("nThrottleWb")
+  // bru signal node
+  val nThrottleWbNexusNode: BundleBridgeNode[Bool] = BundleBroadcast[Bool]()
+  val nThrottleWbSinkNode = BundleBridgeSink[Bool]()
+  val nThrottleWbNode: BundleBridgeInwardNode[Bool] = 
+    nThrottleWbSinkNode := nThrottleWbNexusNode := BundleBridgeNameNode("bru_throttlewb")
 
   /** Node for driving a hart id input, which is to be broadcast to units within the tile.
     *
@@ -242,12 +244,6 @@ abstract class BaseTile private (val crossing: ClockCrossingType, q: Parameters)
     */
   val hartIdNode: BundleBridgeInwardNode[UInt] =
     hartIdSinkNode := hartIdNexusNode := BundleBridgeNameNode("hartid")
-
-  //bru ThrottleWb Node
-  // val ThrottleWbNexusNode: BundleBridgeNode[UInt] = BundleBroadcast[UInt](registered = p(InsertTimingClosureRegistersOnHartIds)) //obviously this param is wrong
-  // val ThrottleWbSinkNode = BundleBridgeSink[UInt]()
-  // val ThrottleWbNode: BundleBridgeInwardNode[UInt] =
-  //   ThrottleWbSinkNode := ThrottleWbNexusNode := BundleBridgeNameNode("throttleWb")
 
   /** Node for broadcasting a reset vector to diplomatic consumers within the tile. */
   val resetVectorNexusNode: BundleBridgeNode[UInt] = BundleBroadcast[UInt]()
