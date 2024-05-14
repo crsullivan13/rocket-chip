@@ -140,13 +140,13 @@ trait HasTileInterruptSources
   */
 trait HasTileInputConstants extends InstantiatesTiles { this: BaseSubsystem =>
 
-  val tilenThrottleWbNode = BundleBridgeEphemeralNode[Bool]()
-  val tilenThrottleWbIONodes : Seq[BundleBridgeSource[Bool]] =
-    Seq.fill(tiles.size) {
-      val nThrottleWbVectorSource = BundleBridgeSource[Bool]()
-      tilenThrottleWbNode := nThrottleWbVectorSource
-      nThrottleWbVectorSource
-    }
+  // val tilenThrottleWbNode = BundleBridgeEphemeralNode[Bool]()
+  // val tilenThrottleWbIONodes : Seq[BundleBridgeSource[Bool]] =
+  //   Seq.fill(tiles.size) {
+  //     val nThrottleWbVectorSource = BundleBridgeSource[Bool]()
+  //     tilenThrottleWbNode := nThrottleWbVectorSource
+  //     nThrottleWbVectorSource
+  //   }
 
   /** tileHartIdNode is used to collect publishers and subscribers of hartids. */
   val tileHartIdNode = BundleBridgeEphemeralNode[UInt]()
@@ -275,25 +275,23 @@ trait CanAttachTile {
 
   def connectBru(domain: TilePRCIDomain[TileType], context: TileContextType, bru: Option[BwRegulator], finalConnection: Boolean): Unit = {
     bru match {
-      case Some(bru) => {
-        connectMasterPortsBru(domain, context, bru)
-      }
-      case None => {
-        connectMasterPorts(domain, context)
-      }
+      case Some(bwReg) => connectMasterPortsBru(domain, context, bwReg)
+      case None => connectMasterPorts(domain, context)
     }
+    
     connectSlavePorts(domain, context)
     connectInterrupts(domain, context)
     connectPRC(domain, context)
     connectOutputNotifications(domain, context)
     connectInputConstants(domain, context)
-    if ( finalConnection ) {
-      bru match {
-        case Some(bru) => {
-          connectBruSbus(context, bru)
-        }
-        case None => None
+
+    bru match {
+      case Some(bwReg) => {
+        if ( finalConnection ) {
+          connectBruSbus(context, bwReg)
+        }   
       }
+      case None => None
     }
   }
 
@@ -395,9 +393,7 @@ trait CanAttachTile {
     val tlBusToGetPrefixFrom = context.locateTLBusWrapper(crossingParams.mmioBaseAddressPrefixWhere)
     domain.tile.hartIdNode := context.tileHartIdNode
     domain.tile.resetVectorNode := context.tileResetVectorNode
-    domain.tile.nThrottleWbNode := context.tilenThrottleWbNode
     tlBusToGetPrefixFrom.prefixNode.foreach { domain.tile.mmioAddressPrefixNode := _ }
-    //domain.tile.nThrottleWbNode := context.tileNWbInhibitNode
   }
 
   /** Connect power/reset/clock resources. */
@@ -516,6 +512,4 @@ trait HasTilesModuleImp extends LazyModuleImp {
     }
   }
   val nmi = outer.tiles.zip(outer.tileNMIIONodes).zipWithIndex.map { case ((tile, n), i) => tile.tileParams.core.useNMI.option(n.makeIO(s"nmi_$i")) }
-
-  //val bru_throttlewb = (outer.tilenThrottleWbIONodes).zip(outer.BwRegulator.io.nThrottleWb).map { case(n, i) => n.makeIO(s"bru_throttlewb_$i") }
 }

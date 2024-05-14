@@ -230,12 +230,6 @@ abstract class BaseTile private (val crossing: ClockCrossingType, q: Parameters)
   /** Node for consuming the hart id input in tile-layer Chisel logic. */
   val hartIdSinkNode = BundleBridgeSink[UInt]()
 
-  // bru signal node
-  val nThrottleWbNexusNode: BundleBridgeNode[Bool] = BundleBroadcast[Bool]()
-  val nThrottleWbSinkNode = BundleBridgeSink[Bool]()
-  val nThrottleWbNode: BundleBridgeInwardNode[Bool] = 
-    nThrottleWbSinkNode := nThrottleWbNexusNode := BundleBridgeNameNode("bru_throttlewb")
-
   /** Node for driving a hart id input, which is to be broadcast to units within the tile.
     *
     * Making this id value an IO and then using it to do lookups of information
