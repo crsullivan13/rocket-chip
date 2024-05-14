@@ -479,15 +479,6 @@ trait HasTiles extends InstantiatesTiles with HasCoreMonitorBundles with Default
       p(BRUKey) match {
         case Some(_) => {
           params.connectBru(td.asInstanceOf[TilePRCIDomain[params.TileType]], this.asInstanceOf[params.TileContextType], BwRegulator, (tileAttachParams.size-1) == i)
-          
-          BwRegulator match {
-            case Some(bru) => {
-              pbus.coupleTo("bru") { 
-              bru.regnode := 
-              TLFragmenter(pbus.beatBytes, pbus.blockBytes) := _ }
-            }
-            case None => None
-          }
         }
         case None => {
           params.connect(td.asInstanceOf[TilePRCIDomain[params.TileType]], this.asInstanceOf[params.TileContextType])
