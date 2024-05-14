@@ -12,7 +12,6 @@ import freechips.rocketchip.tile._
 import freechips.rocketchip.tilelink._
 import freechips.rocketchip.prci.{ClockGroup, ResetCrossingType, ClockGroupNode}
 import freechips.rocketchip.util._
-import freechips.rocketchip.subsystem
 
 /** Entry point for Config-uring the presence of Tiles */
 case class TilesLocated(loc: HierarchicalLocation) extends Field[Seq[CanAttachTile]](Nil)
@@ -140,13 +139,10 @@ trait HasTileInterruptSources
   */
 trait HasTileInputConstants extends InstantiatesTiles { this: BaseSubsystem =>
 
-  // val tilenThrottleWbNode = BundleBridgeEphemeralNode[Bool]()
-  // val tilenThrottleWbIONodes : Seq[BundleBridgeSource[Bool]] =
-  //   Seq.fill(tiles.size) {
-  //     val nThrottleWbVectorSource = BundleBridgeSource[Bool]()
-  //     tilenThrottleWbNode := nThrottleWbVectorSource
-  //     nThrottleWbVectorSource
-  //   }
+  // val tilenThrottleWbNode = BundleBridgeEphemeralNode[Vec[Bool]]()
+  // val tilenThrottleWbNexusNode = BundleBroadcast[Vec[Bool]]()
+
+  // tilenThrottleWbNode :*= tilenThrottleWbNexusNode
 
   /** tileHartIdNode is used to collect publishers and subscribers of hartids. */
   val tileHartIdNode = BundleBridgeEphemeralNode[UInt]()
@@ -483,6 +479,15 @@ trait HasTiles extends InstantiatesTiles with HasCoreMonitorBundles with Default
       p(BRUKey) match {
         case Some(_) => {
           params.connectBru(td.asInstanceOf[TilePRCIDomain[params.TileType]], this.asInstanceOf[params.TileContextType], BwRegulator, (tileAttachParams.size-1) == i)
+          
+          BwRegulator match {
+            case Some(bru) => {
+              pbus.coupleTo("bru") { 
+              bru.regnode := 
+              TLFragmenter(pbus.beatBytes, pbus.blockBytes) := _ }
+            }
+            case None => None
+          }
         }
         case None => {
           params.connect(td.asInstanceOf[TilePRCIDomain[params.TileType]], this.asInstanceOf[params.TileContextType])
