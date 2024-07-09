@@ -39,11 +39,13 @@ class MemoryBus(params: MemoryBusParams, name: String = "memory_bus")(implicit p
     addressPrefixNexusNode
   }
 
+  val memreg = LazyModule(new MemRegulator(params = BRUParams(0,0,0,0,false), location = "dram"))
   private val xbar = LazyModule(new TLXbar).suggestName(busName + "_xbar")
   val inwardNode: TLInwardNode =
-    replicator.map(xbar.node :*=* TLFIFOFixer(TLFIFOFixer.all) :*=* _.node)
-        .getOrElse(xbar.node :*=* TLFIFOFixer(TLFIFOFixer.all))
+    replicator.map(xbar.node :*=* memreg.node :*=* TLFIFOFixer(TLFIFOFixer.all) :*=* _.node)
+        .getOrElse(xbar.node :*=* memreg.node :*=* TLFIFOFixer(TLFIFOFixer.all))
 
+  // potentially add DRAM BRU here
   val outwardNode: TLOutwardNode = ProbePicker() :*= xbar.node
   def busView: TLEdge = xbar.node.edges.in.head
 

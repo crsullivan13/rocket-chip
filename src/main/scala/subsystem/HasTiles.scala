@@ -470,13 +470,13 @@ trait InstantiatesTiles { this: BaseSubsystem =>
 }
 
 /** HasTiles instantiates and also connects a Config-urable sequence of tiles of any type to subsystem interconnect resources. */
-trait HasTiles extends InstantiatesTiles with HasCoreMonitorBundles with DefaultTileContextType with CanHavePeripheryBRU
+trait HasTiles extends InstantiatesTiles with HasCoreMonitorBundles with DefaultTileContextType with CanHavePeripheryLLCBRU
 { this: BaseSubsystem => // TODO: ideally this bound would be softened to Attachable
   implicit val p: Parameters
 
   // connect all the tiles to interconnect attachment points made available in this subsystem context
   tileAttachParams.zip(tile_prci_domains).zipWithIndex.foreach { case ((params, td), i) => {
-      p(BRUKey) match {
+      p(LLCBRUKey) match {
         case Some(_) => {
           params.connectBru(td.asInstanceOf[TilePRCIDomain[params.TileType]], this.asInstanceOf[params.TileContextType], BwRegulator, (tileAttachParams.size-1) == i)
         }

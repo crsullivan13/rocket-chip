@@ -182,6 +182,7 @@ final class TLBundleA(params: TLBundleParameters)
   val address = UInt(params.addressBits.W) // to
   val user    = BundleMap(params.requestFields)
   val echo    = BundleMap(params.echoFields)
+  val domainId = UInt(2.W)
   // variable fields during multibeat:
   val mask    = UInt((params.dataBits/8).W)
   val data    = UInt(params.dataBits.W)
