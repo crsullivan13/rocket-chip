@@ -269,10 +269,11 @@ trait CanAttachTile {
     connectInputConstants(domain, context)
   }
 
-  def connectBru(domain: TilePRCIDomain[TileType], context: TileContextType, bru: Option[BwRegulator], finalConnection: Boolean): Unit = {
-    bru match {
-      case Some(bwReg) => connectMasterPortsBru(domain, context, bwReg)
-      case None => connectMasterPorts(domain, context)
+  def connectBru(domain: TilePRCIDomain[TileType], context: TileContextType, llcbru: Option[BwRegulator], drambru: Option[MemRegulator], finalConnection: Boolean): Unit = {
+    (llcbru,drambru) match {
+      case (Some(bwReg),None) => connectMasterPortsBru(domain, context, bwReg)
+      case (None, Some(drambru)) => connectMasterPortsDRAMBru(domain, context, drambru)
+      case _ => connectMasterPorts(domain, context)
     }
     
     connectSlavePorts(domain, context)
@@ -281,13 +282,18 @@ trait CanAttachTile {
     connectOutputNotifications(domain, context)
     connectInputConstants(domain, context)
 
-    bru match {
-      case Some(bwReg) => {
+    (llcbru,drambru) match {
+      case (Some(bwReg),None) => {
         if ( finalConnection ) {
           connectBruSbus(context, bwReg)
         }   
       }
-      case None => None
+      case (None,Some(drambru)) => {
+        if ( finalConnection ) {
+          connectDRAMBruSbus(context, drambru)
+        }
+      }
+      case _ => None
     }
   }
 
@@ -300,11 +306,27 @@ trait CanAttachTile {
     }
   }
 
+  def connectDRAMBruSbus(context: Attachable, bru: MemRegulator): Unit = {
+    implicit val p = context.p
+    val dataBus = context.locateTLBusWrapper(crossingParams.master.where)
+    dataBus.coupleFrom(tileParams.name.getOrElse("tile")) { bus =>
+      bus :=* bru.node  
+    }
+  }
+
   def connectBruSbus(context: Attachable, bru: BwRegulator): Unit = {
     implicit val p = context.p
     val dataBus = context.locateTLBusWrapper(crossingParams.master.where)
     dataBus.coupleFrom(tileParams.name.getOrElse("tile")) { bus =>
       bus :=* bru.node  
+    }
+  }
+
+  def connectMasterPortsDRAMBru(domain: TilePRCIDomain[TileType], context: Attachable, bru: MemRegulator): Unit = {
+    implicit val p = context.p
+    val dataBus = context.locateTLBusWrapper(crossingParams.master.where)
+    dataBus.coupleFrom(tileParams.name.getOrElse("tile")) { bus =>
+      bru.node :=* crossingParams.master.injectNode(context) :=* domain.crossMasterPort(crossingParams.crossingType)
     }
   }
 
@@ -470,17 +492,26 @@ trait InstantiatesTiles { this: BaseSubsystem =>
 }
 
 /** HasTiles instantiates and also connects a Config-urable sequence of tiles of any type to subsystem interconnect resources. */
-trait HasTiles extends InstantiatesTiles with HasCoreMonitorBundles with DefaultTileContextType with CanHavePeripheryLLCBRU
+trait HasTiles extends InstantiatesTiles with HasCoreMonitorBundles with DefaultTileContextType with CanHavePeripheryLLCBRU with CanHavePeripheryDRAMBRU
 { this: BaseSubsystem => // TODO: ideally this bound would be softened to Attachable
   implicit val p: Parameters
 
   // connect all the tiles to interconnect attachment points made available in this subsystem context
   tileAttachParams.zip(tile_prci_domains).zipWithIndex.foreach { case ((params, td), i) => {
-      p(LLCBRUKey) match {
-        case Some(_) => {
-          params.connectBru(td.asInstanceOf[TilePRCIDomain[params.TileType]], this.asInstanceOf[params.TileContextType], BwRegulator, (tileAttachParams.size-1) == i)
+      (p(LLCBRUKey), p(DRAMBRUKey)) match {
+        case (Some(_),None) => {
+          params.connectBru(td.asInstanceOf[TilePRCIDomain[params.TileType]], this.asInstanceOf[params.TileContextType], BwRegulator, None, (tileAttachParams.size-1) == i)
         }
-        case None => {
+        case (None,Some(_)) => {
+          params.connectBru(td.asInstanceOf[TilePRCIDomain[params.TileType]], this.asInstanceOf[params.TileContextType], None, MemRegulator, (tileAttachParams.size-1) == i)
+          mbus.memcount match {
+            case Some(count) => {
+              MemRegulator.get.ioNode := count.ioNode
+            }
+            case None => assert(false) // This should never happen with how the code is structured right now, i.e. both count and reg must exist, or neither exist
+          }
+        }
+        case _ => {
           params.connect(td.asInstanceOf[TilePRCIDomain[params.TileType]], this.asInstanceOf[params.TileContextType])
         }
       }

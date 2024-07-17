@@ -63,4 +63,5 @@ class PeripheryBus(params: PeripheryBusParams, name: String)(implicit p: Paramet
   def busView: TLEdge = fixer.node.edges.in.head
 
   val builtInDevices: BuiltInDevices = BuiltInDevices.attach(params, outwardNode)
+  val memcount = None
 }

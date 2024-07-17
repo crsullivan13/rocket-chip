@@ -35,6 +35,7 @@ abstract class TLBusWrapper(params: HasTLBusParams, val busName: String)(implici
     extends ClockDomain
     with HasTLBusParams
     with CanHaveBuiltInDevices
+    with CanHaveMemCount
 {
   private val clockGroupAggregator = LazyModule(new ClockGroupAggregator(busName){ override def shouldBeInlined = true }).suggestName(busName + "_clock_groups")
   private val clockGroup = LazyModule(new ClockGroup(busName){ override def shouldBeInlined = true })
@@ -177,6 +178,9 @@ class TLBusWrapperConnection
   def connect(context: HasTileLinkLocations, master: Location[TLBusWrapper], slave: Location[TLBusWrapper])(implicit p: Parameters): Unit = {
     val masterTLBus = context.locateTLBusWrapper(master)
     val slaveTLBus  = context.locateTLBusWrapper(slave)
+    println(s"Primary: ${masterTLBus.busName}")
+    println(s"Secondary: ${slaveTLBus.busName}")
+    println(s"Flipped: ${flipRendering}")
     def bindClocks(implicit p: Parameters) = driveClockFromMaster match {
       case Some(true)  => slaveTLBus.clockGroupNode  := asyncMux(xType, context.asyncClockGroupsNode, masterTLBus.clockGroupNode)
       case Some(false) => masterTLBus.clockGroupNode := asyncMux(xType, context.asyncClockGroupsNode, slaveTLBus.clockGroupNode)
@@ -250,6 +254,7 @@ case class AddressAdjusterWrapperParams(
 class AddressAdjusterWrapper(params: AddressAdjusterWrapperParams, name: String)(implicit p: Parameters) extends TLBusWrapper(params, name) {
   private val address_adjuster = params.replication.map { r => LazyModule(new AddressAdjuster(r, params.forceLocal, params.localBaseAddressDefault, params.ordered)) }
   private val viewNode = TLIdentityNode()
+
   val inwardNode: TLInwardNode = address_adjuster.map(_.node :*=* TLFIFOFixer(params.policy) :*=* viewNode).getOrElse(viewNode)
   def outwardNode: TLOutwardNode = address_adjuster.map(_.node).getOrElse(viewNode)
   def busView: TLEdge = viewNode.edges.in.head
@@ -259,6 +264,7 @@ class AddressAdjusterWrapper(params: AddressAdjusterWrapperParams, name: String)
   }
   val builtInDevices = BuiltInDevices.none
   override def shouldBeInlined = !params.replication.isDefined
+  val memcount = None
 }
 
 case class TLJBarWrapperParams(
@@ -285,4 +291,5 @@ class TLJBarWrapper(params: TLJBarWrapperParams, name: String)(implicit p: Param
   val prefixNode = None
   val builtInDevices = BuiltInDevices.none
   override def shouldBeInlined = jbar.node.circuitIdentity
+  val memcount = None
 }

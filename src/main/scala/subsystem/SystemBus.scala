@@ -43,4 +43,5 @@ class SystemBus(params: SystemBusParams, name: String = "system_bus")(implicit p
   def busView: TLEdge = system_bus_xbar.node.edges.in.head
 
   val builtInDevices: BuiltInDevices = BuiltInDevices.attach(params, outwardNode)
+  val memcount = None
 }

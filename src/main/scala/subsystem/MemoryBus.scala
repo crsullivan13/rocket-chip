@@ -22,7 +22,7 @@ case class MemoryBusParams(
   with TLBusWrapperInstantiationLike
 {
   def instantiate(context: HasTileLinkLocations, loc: Location[TLBusWrapper])(implicit p: Parameters): MemoryBus = {
-    val mbus = LazyModule(new MemoryBus(this, loc.name))
+    val mbus = LazyModule(new MemoryBus(this, loc.name, context))
     mbus.suggestName(loc.name)
     context.tlBusWrapperLocationMap += (loc -> mbus)
     mbus
@@ -30,7 +30,7 @@ case class MemoryBusParams(
 }
 
 /** Wrapper for creating TL nodes from a bus connected to the back of each mem channel */
-class MemoryBus(params: MemoryBusParams, name: String = "memory_bus")(implicit p: Parameters)
+class MemoryBus(params: MemoryBusParams, name: String = "memory_bus", context: HasTileLinkLocations)(implicit p: Parameters)
     extends TLBusWrapper(params, name)(p)
 {
   private val replicator = params.replication.map(r => LazyModule(new RegionReplicator(r)))
@@ -39,11 +39,16 @@ class MemoryBus(params: MemoryBusParams, name: String = "memory_bus")(implicit p
     addressPrefixNexusNode
   }
 
-  val memreg = LazyModule(new MemRegulator(params = BRUParams(0,0,0,0,false), location = "dram"))
+  val pbus = context.tlBusWrapperLocationMap(PBUS)
+  val memcount = Some(LazyModule(new MemCounter(params = BRUParams(0x20001000L,4,0,0,false))))
+  pbus.coupleTo("dram-count-bru") { 
+    memcount.get.regnode := 
+    TLFragmenter(pbus.beatBytes, pbus.blockBytes) := _ }
+
   private val xbar = LazyModule(new TLXbar).suggestName(busName + "_xbar")
   val inwardNode: TLInwardNode =
-    replicator.map(xbar.node :*=* memreg.node :*=* TLFIFOFixer(TLFIFOFixer.all) :*=* _.node)
-        .getOrElse(xbar.node :*=* memreg.node :*=* TLFIFOFixer(TLFIFOFixer.all))
+    replicator.map(xbar.node :*=* memcount.get.node :*=* TLFIFOFixer(TLFIFOFixer.all) :*=* _.node)
+        .getOrElse(xbar.node :*=* memcount.get.node :*=* TLFIFOFixer(TLFIFOFixer.all))
 
   // potentially add DRAM BRU here
   val outwardNode: TLOutwardNode = ProbePicker() :*= xbar.node
