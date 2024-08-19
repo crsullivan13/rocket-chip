@@ -504,12 +504,12 @@ trait HasTiles extends InstantiatesTiles with HasCoreMonitorBundles with Default
         }
         case (None,Some(_)) => {
           params.connectBru(td.asInstanceOf[TilePRCIDomain[params.TileType]], this.asInstanceOf[params.TileContextType], None, MemRegulator, (tileAttachParams.size-1) == i)
-          mbus.memcount match {
-            case Some(count) => {
-              MemRegulator.get.ioNode := count.ioNode
-            }
-            case None => assert(false) // This should never happen with how the code is structured right now, i.e. both count and reg must exist, or neither exist
-          }
+          // mbus.memcount match {
+          //   case Some(count) => {
+          //     MemRegulator.get.ioNode := count.ioNode
+          //   }
+          //   case None => assert(false) // This should never happen with how the code is structured right now, i.e. both count and reg must exist, or neither exist
+          // }
         }
         case _ => {
           params.connect(td.asInstanceOf[TilePRCIDomain[params.TileType]], this.asInstanceOf[params.TileContextType])

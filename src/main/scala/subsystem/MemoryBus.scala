@@ -39,16 +39,17 @@ class MemoryBus(params: MemoryBusParams, name: String = "memory_bus", context: H
     addressPrefixNexusNode
   }
 
-  val pbus = context.tlBusWrapperLocationMap(PBUS)
-  val memcount = Some(LazyModule(new MemCounter(params = BRUParams(0x20001000L,4,0,0,false))))
-  pbus.coupleTo("dram-count-bru") { 
-    memcount.get.regnode := 
-    TLFragmenter(pbus.beatBytes, pbus.blockBytes) := _ }
+  val memcount = None
+  // val pbus = context.tlBusWrapperLocationMap(PBUS)
+  // val memcount = Some(LazyModule(new MemCounter(params = BRUParams(0x20001000L,4,0,0,false))))
+  // pbus.coupleTo("dram-count-bru") { 
+  //   memcount.get.regnode := 
+  //   TLFragmenter(pbus.beatBytes, pbus.blockBytes) := _ }
 
   private val xbar = LazyModule(new TLXbar).suggestName(busName + "_xbar")
   val inwardNode: TLInwardNode =
-    replicator.map(xbar.node :*=* memcount.get.node :*=* TLFIFOFixer(TLFIFOFixer.all) :*=* _.node)
-        .getOrElse(xbar.node :*=* memcount.get.node :*=* TLFIFOFixer(TLFIFOFixer.all))
+    replicator.map(xbar.node :*=* TLFIFOFixer(TLFIFOFixer.all) :*=* _.node)
+        .getOrElse(xbar.node :*=* TLFIFOFixer(TLFIFOFixer.all))
 
   // potentially add DRAM BRU here
   val outwardNode: TLOutwardNode = ProbePicker() :*= xbar.node
