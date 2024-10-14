@@ -216,6 +216,7 @@ final class TLBundleC(params: TLBundleParameters)
   val address = UInt(params.addressBits.W) // to
   val user    = BundleMap(params.requestFields)
   val echo    = BundleMap(params.echoFields)
+  val domainId = UInt(2.W)
   // variable fields during multibeat:
   val data    = UInt(params.dataBits.W)
   val corrupt = Bool() // only applies to *Data messages
