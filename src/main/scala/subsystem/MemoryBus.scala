@@ -39,12 +39,12 @@ class MemoryBus(params: MemoryBusParams, name: String = "memory_bus", context: H
     addressPrefixNexusNode
   }
 
-  val memcount = None
-  // val pbus = context.tlBusWrapperLocationMap(PBUS)
-  // val memcount = Some(LazyModule(new MemCounter(params = BRUParams(0x20001000L,4,0,0,false))))
-  // pbus.coupleTo("dram-count-bru") { 
-  //   memcount.get.regnode := 
-  //   TLFragmenter(pbus.beatBytes, pbus.blockBytes) := _ }
+  //val memcount = None
+  val pbus = context.tlBusWrapperLocationMap(PBUS)
+  val memcount = Some(LazyModule(new MemCounter(params = BRUParams(0x20001000L,2,0,0,false))))
+  pbus.coupleTo("dram-count-bru") { 
+    memcount.get.regnode := 
+    TLFragmenter(pbus.beatBytes, pbus.blockBytes) := _ }
 
   private val xbar = LazyModule(new TLXbar).suggestName(busName + "_xbar")
   val inwardNode: TLInwardNode =
@@ -52,7 +52,7 @@ class MemoryBus(params: MemoryBusParams, name: String = "memory_bus", context: H
         .getOrElse(xbar.node :*=* TLFIFOFixer(TLFIFOFixer.all))
 
   // potentially add DRAM BRU here
-  val outwardNode: TLOutwardNode = ProbePicker() :*= xbar.node
+  val outwardNode: TLOutwardNode = memcount.get.node := ProbePicker() :*= xbar.node
   def busView: TLEdge = xbar.node.edges.in.head
 
   val builtInDevices: BuiltInDevices = BuiltInDevices.attach(params, outwardNode)
