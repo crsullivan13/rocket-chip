@@ -162,6 +162,7 @@ class TLBroadcast(params: TLBroadcastParams)(implicit p: Parameters) extends Laz
       val c_release      = in.c.bits.opcode === TLMessages.Release
       val c_trackerOH    = trackers.map { t => t.line === (in.c.bits.address >> lineShift) }
       val c_trackerSrc   = Mux1H(c_trackerOH, trackers.map { _.source })
+      val c_trackerDomainId = Mux1H(c_trackerOH, trackers.map { _.domainId })
 
       // Record if this inner cache no longer has the block
       val whoC = if (caches.size == 0) 0.U else Cat(caches.map(_.contains(in.c.bits.source)).reverse)
@@ -195,8 +196,10 @@ class TLBroadcast(params: TLBroadcastParams)(implicit p: Parameters) extends Laz
 
       val put_what = Mux(c_releasedata, TRANSFORM_B, DROP)
       val put_who  = Mux(c_releasedata, in.c.bits.source, c_trackerSrc)
+      val put_domain = Mux(c_releasedata, in.c.bits.domainId, c_trackerDomainId)
       putfull.valid := in.c.valid && (c_probeackdata || (c_releasedata && (filter.io.release.ready || !c_first)))
       putfull.bits := edgeOut.Put(Cat(put_what, put_who), in.c.bits.address, in.c.bits.size, in.c.bits.data)._2
+      putfull.bits.domainId := put_domain
       putfull.bits.user.lift(AMBAProt).foreach { x =>
         x.fetch       := false.B
         x.secure      := true.B
@@ -409,6 +412,7 @@ class TLBroadcastTracker(id: Int, lineBytes: Int, caches: Int, bufferless: Boole
     val d_last = Input(Bool())
     val e_last = Input(Bool())
     val source = Output(UInt()) // the source awaiting D response
+    val domainId = Output(UInt())
     val line = Output(UInt())   // the line waiting for probes
     val idle = Output(Bool())
     val need_d = Output(Bool())
@@ -430,6 +434,7 @@ class TLBroadcastTracker(id: Int, lineBytes: Int, caches: Int, bufferless: Boole
   val source  = Reg(io.in_a.bits.source)
   val user    = Reg(io.in_a.bits.user)
   val echo    = Reg(io.in_a.bits.echo)
+  val domainId = Reg(io.in_a.bits.domainId)
   val address = RegInit((id << lineShift).U(io.in_a.bits.address.getWidth.W))
   val count   = Reg(UInt(log2Ceil(caches+1).W))
   val cacheOH = Reg(UInt(caches.W))
@@ -448,6 +453,7 @@ class TLBroadcastTracker(id: Int, lineBytes: Int, caches: Int, bufferless: Boole
     echo   :<= io.in_a.bits.echo
     address := io.in_a.bits.address
     count   := 1.U
+    domainId := io.in_a.bits.domainId
   }
 
   cacheOH := cacheOH & ~io.clearOH
@@ -477,6 +483,7 @@ class TLBroadcastTracker(id: Int, lineBytes: Int, caches: Int, bufferless: Boole
   io.idle := idle
   io.need_d := !sent_d
   io.source := source
+  io.domainId := domainId
   io.line := address >> lineShift
   io.cacheOH := cacheOH
 
@@ -505,6 +512,7 @@ class TLBroadcastTracker(id: Int, lineBytes: Int, caches: Int, bufferless: Boole
   io.out_a.bits.corrupt := false.B
   io.out_a.bits.user   :<= user
   io.out_a.bits.echo   :<= echo
+  io.out_a.bits.domainId := domainId
 }
 
 object TLBroadcastConstants
