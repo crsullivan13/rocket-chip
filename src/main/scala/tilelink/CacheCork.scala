@@ -98,6 +98,7 @@ class TLCacheCork(params: TLCacheCorkParams = TLCacheCorkParams())(implicit p: P
           lgSize     = in.c.bits.size,
           data       = in.c.bits.data,
           corrupt    = in.c.bits.corrupt)._2
+        c_a.bits.domainId := in.c.bits.domainId
         c_a.bits.user :<= in.c.bits.user
 
         // Releases without Data succeed instantly
