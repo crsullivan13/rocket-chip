@@ -421,8 +421,8 @@ class TLEdgeOut(
     c.size    := lgSize
     c.source  := fromSource
     c.address := toAddress
-    c.data    := UInt(0)
-    c.corrupt := Bool(false)
+    c.data    := 0.U
+    c.corrupt := false.B
     (legal, c)
   }
 
@@ -436,7 +436,7 @@ class TLEdgeOut(
     c.source  := fromSource
     c.address := toAddress
     c.data    := data
-    c.corrupt := Bool(false)
+    c.corrupt := false.B
     (legal, c)
   }
 
@@ -449,8 +449,8 @@ class TLEdgeOut(
     c.size    := lgSize
     c.source  := fromSource
     c.address := toAddress
-    c.data    := UInt(0)
-    c.corrupt := Bool(false)
+    c.data    := 0.U
+    c.corrupt := false.B
     (legal, c)
   }
 
@@ -464,7 +464,7 @@ class TLEdgeOut(
     c.source  := fromSource
     c.address := toAddress
     c.data    := data
-    c.corrupt := Bool(false)
+    c.corrupt := false.B
     (legal, c)
   }
 
