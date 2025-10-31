@@ -298,12 +298,12 @@ class TraceGenerator(val params: TraceGenParams)(implicit val p: Parameters) ext
   // NOTE: frequencies must sum to a power of two.
 
   val randOp = Frequency(List(
-    (10, opLoad),
-    (10, opStore),
-    (4,  opFence),
-    (3,  opLRSC),
-    (3,  opSwap),
-    (2,  opDelay)))
+    (0, opLoad),
+    (16, opStore),
+    (0,  opFence),
+    (0,  opLRSC),
+    (0,  opSwap),
+    (0,  opDelay)))
 
   // Request/response tags
   // ---------------------
@@ -623,6 +623,9 @@ class TraceGenTile private(
     this(params, crossing.crossingType, lookup, p)
 
   val masterNode: TLOutwardNode = TLIdentityNode() := visibilityNode := dcacheOpt.map(_.node).getOrElse(TLTempNode())
+
+  override val bwRegNode = None
+  override val accessNode = None
 
   override lazy val module = new TraceGenTileModuleImp(this)
 }

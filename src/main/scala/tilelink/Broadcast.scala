@@ -25,7 +25,7 @@ case class TLBroadcastControlParams(
 
 case class TLBroadcastParams(
   lineBytes:     Int,
-  numTrackers:   Int = 4,
+  numTrackers:   Int = 28,
   bufferless:    Boolean = false,
   control:       Option[TLBroadcastControlParams] = None,
   filterFactory: TLBroadcast.ProbeFilterFactory = BroadcastFilter.factory)
@@ -512,6 +512,7 @@ class TLBroadcastTracker(id: Int, lineBytes: Int, caches: Int, bufferless: Boole
   io.out_a.bits.corrupt := false.B
   io.out_a.bits.user   :<= user
   io.out_a.bits.echo   :<= echo
+  io.out_a.bits.domainId := 0.U
 }
 
 object TLBroadcastConstants

@@ -191,6 +191,19 @@ trait HasTileParameters extends HasNonDiplomaticTileParameters {
   def vaddrBitsExtended: Int = vpnBitsExtended + pgIdxBits
 }
 
+class BRUTileIO(val nBanks: Int) extends Bundle {
+    val nThrottle = Output(Vec(nBanks, Bool()))
+}
+
+class BRUPerBankTileIO(val nDomains: Int, val nBanks: Int) extends Bundle {
+    val nThrottle = Output(Vec(nDomains, Vec(nBanks, Bool())))
+}
+
+class BRUTileAccessIO(val nBanks: Int) extends Bundle {
+    val bank = Output(UInt(log2Ceil(nBanks).W))
+    val didFire = Output(Bool())
+}
+
 /** Base class for all Tiles that use TileLink */
 abstract class BaseTile private (crossing: ClockCrossingType, q: Parameters)
     extends BaseHierarchicalElement(crossing)(q)
@@ -211,6 +224,10 @@ abstract class BaseTile private (crossing: ClockCrossingType, q: Parameters)
   def ceaseNode: IntOutwardNode               // Tile has ceased to retire instructions
   def wfiNode: IntOutwardNode                 // Tile is waiting for an interrupt
   def module: BaseTileModuleImp[BaseTile]
+
+  val bwRegNode: Option[BundleBridgeSink[BRUTileIO]]
+  val accessNode: Option[BundleBridgeSource[BRUTileAccessIO]]
+  //val bwRegInNode: Option[BundleBridgeInwardNode[BRUTileIO]] = bwRegNode.map(_ := BundleBridgeNameNode("bwreg_signals"))
 
   /** Node for broadcasting a hart id to diplomatic consumers within the tile. */
   val hartIdNexusNode: BundleBridgeNode[UInt] = BundleBroadcast[UInt](registered = p(InsertTimingClosureRegistersOnHartIds))

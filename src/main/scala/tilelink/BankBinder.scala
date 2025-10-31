@@ -55,6 +55,7 @@ case class BankBinderNode(mask: BigInt)(implicit valName: ValName) extends TLCus
 /* A BankBinder is used to divide contiguous memory regions into banks, suitable for a cache  */
 class BankBinder(mask: BigInt)(implicit p: Parameters) extends LazyModule
 {
+  println(s"Bank binder mask: ${mask}")
   val node = BankBinderNode(mask)
 
   lazy val module = new Impl

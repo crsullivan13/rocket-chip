@@ -32,4 +32,5 @@ class FrontBus(params: FrontBusParams, name: String = "front_bus")(implicit p: P
     with HasTLXbarPhy {
   val builtInDevices: BuiltInDevices = BuiltInDevices.attach(params, outwardNode)
   val prefixNode = None
+  val BwRegulator = None
 }

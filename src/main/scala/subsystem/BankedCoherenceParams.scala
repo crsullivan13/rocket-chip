@@ -73,6 +73,8 @@ class CoherenceManagerWrapper(params: CoherenceManagerWrapperParams, context: Ha
   private def banked(node: TLOutwardNode): TLOutwardNode =
     if (params.nBanks == 0) node else { TLTempNode() :=* BankBinder(params.nBanks, params.blockBytes) :*= node }
   val outwardNode = banked(tempOut)
+
+  val BwRegulator = None
 }
 
 object CoherenceManagerWrapper {

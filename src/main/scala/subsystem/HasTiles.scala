@@ -177,6 +177,45 @@ trait CanAttachTile {
     connectTrace(domain, context)
   }
 
+  def connectBRU(domain: TilePRCIDomain[TileType], context: TileContextType, isLast: Boolean): Unit = {
+    connectTileToBRU(domain, context)
+    if ( isLast ) {
+      connectBRUToBus(domain, context)
+    }
+
+    connectSlavePorts(domain, context)
+    connectInterrupts(domain, context)
+    connectPRC(domain, context)
+    connectOutputNotifications(domain, context)
+    connectInputConstants(domain, context)
+    connectTrace(domain, context)
+
+    connectBwRegPorts(domain, context)
+  }
+
+  def connectBwRegPorts(domain: TilePRCIDomain[TileType], context: Attachable): Unit = {
+    implicit val p = context.p
+    val dataBus = context.locateTLBusWrapper(crossingParams.master.where)
+    domain.element.bwRegNode.get := dataBus.BwRegulator.get.ioNode(domain.element.tileId)
+    dataBus.BwRegulator.get.coreAccessNode(domain.element.tileId) := domain.element.accessNode.get
+  }
+
+  def connectTileToBRU(domain: TilePRCIDomain[TileType], context: Attachable): Unit = {
+    implicit val p = context.p
+    val dataBus = context.locateTLBusWrapper(crossingParams.master.where)
+    dataBus.coupleFrom(tileParams.baseName) { bus =>
+      dataBus.BwRegulator.get.adapterNode :=* crossingParams.master.injectNode(context) :=* domain.crossMasterPort(crossingParams.crossingType)
+    }
+  }
+
+  def connectBRUToBus(domain: TilePRCIDomain[TileType], context: Attachable): Unit = {
+    implicit val p = context.p
+    val dataBus = context.locateTLBusWrapper(crossingParams.master.where)
+    dataBus.coupleFrom(tileParams.baseName) { bus =>
+      bus :=* dataBus.BwRegulator.get.adapterNode
+    }
+  }
+
   /** Connect the port where the tile is the master to a TileLink interconnect. */
   def connectMasterPorts(domain: TilePRCIDomain[TileType], context: Attachable): Unit = {
     implicit val p = context.p

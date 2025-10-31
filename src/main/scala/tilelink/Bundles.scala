@@ -187,6 +187,7 @@ final class TLBundleA(params: TLBundleParameters)
   val mask    = UInt((params.dataBits/8).W)
   val data    = UInt(params.dataBits.W)
   val corrupt = Bool() // only applies to *Data messages
+  val domainId = UInt(2.W)
 }
 final class TLBundleB(params: TLBundleParameters)
   extends TLBundleBase(params) with TLAddrChannel
@@ -221,6 +222,7 @@ final class TLBundleC(params: TLBundleParameters)
   // variable fields during multibeat:
   val data    = UInt(params.dataBits.W)
   val corrupt = Bool() // only applies to *Data messages
+  val domainId = UInt(2.W)
 }
 
 final class TLBundleD(params: TLBundleParameters)

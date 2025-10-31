@@ -53,4 +53,6 @@ class MemoryBus(params: MemoryBusParams, name: String = "memory_bus")(implicit p
   def busView: TLEdge = xbar.node.edges.in.head
 
   val builtInDevices: BuiltInDevices = BuiltInDevices.attach(params, outwardNode)
+
+  val BwRegulator = None
 }

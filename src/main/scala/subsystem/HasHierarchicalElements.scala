@@ -118,13 +118,33 @@ trait HasHierarchicalElements extends DefaultHierarchicalElementContextType
 { this: LazyModule with Attachable with InstantiatesHierarchicalElements =>
   implicit val p: Parameters
 
+  var tileCount = 1
   // connect all the tiles to interconnect attachment points made available in this subsystem context
   tileAttachParams.foreach { params =>
-    params.connect(tile_prci_domains(params.tileParams.tileId).asInstanceOf[TilePRCIDomain[params.TileType]], this.asInstanceOf[params.TileContextType])
+    if ( params.tileParams.baseName == "boom_tile" ) {
+      println("BOOM core found")
+      params.connectBRU(tile_prci_domains(params.tileParams.tileId).asInstanceOf[TilePRCIDomain[params.TileType]], this.asInstanceOf[params.TileContextType], tileCount == tileAttachParams.length)
+    } else {
+      println("Non-BOOM core found")
+      params.connect(tile_prci_domains(params.tileParams.tileId).asInstanceOf[TilePRCIDomain[params.TileType]], this.asInstanceOf[params.TileContextType])
+    }
+    tileCount = tileCount + 1
   }
+
   clusterAttachParams.foreach { params =>
     params.connect(cluster_prci_domains(params.clusterParams.clusterId).asInstanceOf[ClusterPRCIDomain], this.asInstanceOf[params.ClusterContextType])
   }
+
+  // tileAttachParams.foreach { params =>
+  //   if ( params.tileParams.baseName == "boom_tile" ) {
+  //     println("BOOM core found")
+  //     // val domain = tile_prci_domains(params.tileParams.tileId).asInstanceOf[TilePRCIDomain[params.TileType]]
+  //     // println(domain.element.bwRegNode)
+  //     params.connectBwRegPorts(tile_prci_domains(params.tileParams.tileId).asInstanceOf[TilePRCIDomain[params.TileType]], this.asInstanceOf[params.TileContextType])
+  //   } else {
+  //     println("Non-BOOM core found")
+  //   }
+  // }
 }
 
 /** Provides some Chisel connectivity to certain tile IOs

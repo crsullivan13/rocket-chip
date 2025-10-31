@@ -23,7 +23,7 @@ import freechips.rocketchip.prci.{
 }
 import freechips.rocketchip.subsystem.{
   HasTileLinkLocations, CanConnectWithinContextThatHasTileLinkLocations,
-  CanInstantiateWithinContextThatHasTileLinkLocations
+  CanInstantiateWithinContextThatHasTileLinkLocations, CanHavePeripheryBRU
 }
 import freechips.rocketchip.util.Location
 
@@ -48,6 +48,7 @@ abstract class TLBusWrapper(params: HasTLBusParams, val busName: String)(implici
     extends ClockDomain
     with HasTLBusParams
     with CanHaveBuiltInDevices
+    with CanHavePeripheryBRU
 {
   private val clockGroupAggregator = LazyModule(new ClockGroupAggregator(busName){ override def shouldBeInlined = true }).suggestName(busName + "_clock_groups")
   private val clockGroup = LazyModule(new ClockGroup(busName){ override def shouldBeInlined = true })
@@ -278,6 +279,8 @@ class AddressAdjusterWrapper(params: AddressAdjusterWrapperParams, name: String)
   }
   val builtInDevices = BuiltInDevices.none
   override def shouldBeInlined = !params.replication.isDefined
+
+  val BwRegulator = None
 }
 
 case class TLJBarWrapperParams(
@@ -304,4 +307,6 @@ class TLJBarWrapper(params: TLJBarWrapperParams, name: String)(implicit p: Param
   val prefixNode = None
   val builtInDevices = BuiltInDevices.none
   override def shouldBeInlined = jbar.node.circuitIdentity
+
+  val BwRegulator = None
 }

@@ -51,6 +51,7 @@ class TLXbar(policy: TLArbiter.Policy = TLArbiter.roundRobin, nameSuffix: Option
     },
     managerFn = { seq =>
       val fifoIdFactory = TLXbar.relabeler()
+      println(s"ID RANGES: ${TLXbar.mapOutputIds(seq).map(_.size)} ${nameSuffix}")
       seq(0).v1copy(
         responseFields = BundleField.union(seq.flatMap(_.responseFields)),
         requestKeys = seq.flatMap(_.requestKeys).distinct,

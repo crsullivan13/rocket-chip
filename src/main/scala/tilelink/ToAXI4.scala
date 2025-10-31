@@ -269,6 +269,7 @@ class TLToAXI4(val combinational: Boolean = true, val adapterName: Option[String
         // means that a TileLink master which performs early source reuse can
         // have one more transaction inflight than we promised AXI; stall it too.
         val maxCount = n.getOrElse(1)
+        println(s"DRAM MAX COUNT: ${maxCount}")
         val count = RegInit(0.U(log2Ceil(maxCount + 1).W))
         val write = Reg(Bool())
         val idle = count === 0.U
