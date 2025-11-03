@@ -423,6 +423,7 @@ class TLEdgeOut(
     c.address := toAddress
     c.data    := 0.U
     c.corrupt := false.B
+    c.domainId := 0.U
     (legal, c)
   }
 
@@ -437,6 +438,7 @@ class TLEdgeOut(
     c.address := toAddress
     c.data    := data
     c.corrupt := false.B
+    c.domainId := 0.U
     (legal, c)
   }
 
@@ -451,6 +453,7 @@ class TLEdgeOut(
     c.address := toAddress
     c.data    := 0.U
     c.corrupt := false.B
+    c.domainId := 0.U
     (legal, c)
   }
 
@@ -465,6 +468,7 @@ class TLEdgeOut(
     c.address := toAddress
     c.data    := data
     c.corrupt := false.B
+    c.domainId := 0.U
     (legal, c)
   }
 
