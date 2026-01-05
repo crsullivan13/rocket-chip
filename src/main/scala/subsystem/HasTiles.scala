@@ -196,8 +196,17 @@ trait CanAttachTile {
   def connectBwRegPorts(domain: TilePRCIDomain[TileType], context: Attachable): Unit = {
     implicit val p = context.p
     val dataBus = context.locateTLBusWrapper(crossingParams.master.where)
-    domain.element.bwRegNode.get := dataBus.BwRegulator.get.ioNode(domain.element.tileId)
-    dataBus.BwRegulator.get.coreAccessNode(domain.element.tileId) := domain.element.accessNode.get
+
+    dataBus.BwRegulator match {
+      case Some(bwReg) => {
+        domain.element.bwRegNode.get := bwReg.ioNode(domain.element.tileId)
+      }
+      case None =>
+        require(domain.element.bwRegNode.isEmpty,
+          "bwRegNode exists but BwRegulator does not")
+    }
+
+    // dataBus.BwRegulator.get.coreAccessNode(domain.element.tileId) := domain.element.accessNode.get
   }
 
   def connectTileToBRU(domain: TilePRCIDomain[TileType], context: Attachable): Unit = {
