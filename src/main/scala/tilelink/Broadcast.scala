@@ -512,7 +512,8 @@ class TLBroadcastTracker(id: Int, lineBytes: Int, caches: Int, bufferless: Boole
   io.out_a.bits.corrupt := false.B
   io.out_a.bits.user   :<= user
   io.out_a.bits.echo   :<= echo
-  io.out_a.bits.domainId := 0.U
+  io.out_a.bits.rcid := 0.U
+  io.out_a.bits.mcid := 0.U
 }
 
 object TLBroadcastConstants

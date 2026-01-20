@@ -14,6 +14,7 @@ case object MaxHartIdBits extends Field[Int]
 // These parameters can be varied per-core
 trait CoreParams {
   val bootFreqHz: BigInt
+  val useCBQRI: Boolean = false
   val useVM: Boolean
   val useHypervisor: Boolean
   val useUser: Boolean
@@ -74,6 +75,8 @@ trait HasCoreParameters extends HasTileParameters {
 
   val minFLen = coreParams.fpu.map(_ => coreParams.minFLen).getOrElse(0)
   val fLen = coreParams.fpu.map(_.fLen).getOrElse(0)
+
+  val usingCBQRI = coreParams.useCBQRI
 
   val usingMulDiv = coreParams.mulDiv.nonEmpty
   val usingFPU = coreParams.fpu.nonEmpty
