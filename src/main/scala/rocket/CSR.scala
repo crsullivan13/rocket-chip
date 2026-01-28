@@ -1533,6 +1533,9 @@ class CSRFile(
         reg_vxrm.get := wdata >> 1
       }
     }
+    if (usingCBQRI) {
+      when (decoded_addr(CSRs.srmcfg)) { reg_srmcfg.get := wdata }
+    }
   }
 
   def setCustomCSR(io: CustomCSRIO, csr: CustomCSR, reg: UInt) = {
