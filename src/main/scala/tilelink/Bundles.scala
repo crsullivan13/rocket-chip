@@ -188,8 +188,8 @@ final class TLBundleA(params: TLBundleParameters)
   val data    = UInt(params.dataBits.W)
   val corrupt = Bool() // only applies to *Data messages
   //val domainId = UInt(2.W)
-  val rcid = UInt(6.W)
-  val mcid = UInt(6.W)
+  val rcid = UInt(4.W)
+  val mcid = UInt(4.W)
 }
 final class TLBundleB(params: TLBundleParameters)
   extends TLBundleBase(params) with TLAddrChannel
