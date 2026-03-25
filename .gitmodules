@@ -11,3 +11,6 @@
 	path = dependencies/diplomacy
 	url = https://github.com/chipsalliance/diplomacy.git
 	branch = master
+[submodule "src/main/scala/subsystem/BwReg"]
+	path = src/main/scala/subsystem/BwReg
+	url = https://github.com/crsullivan13/BwReg
