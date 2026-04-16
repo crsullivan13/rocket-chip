@@ -54,5 +54,5 @@ class MemoryBus(params: MemoryBusParams, name: String = "memory_bus")(implicit p
 
   val builtInDevices: BuiltInDevices = BuiltInDevices.attach(params, outwardNode)
 
-  val BwRegulator = None
+  val memTrafficControl = None
 }

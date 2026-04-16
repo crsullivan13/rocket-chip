@@ -71,5 +71,5 @@ class PeripheryBus(params: PeripheryBusParams, name: String)(implicit p: Paramet
 
   val builtInDevices: BuiltInDevices = BuiltInDevices.attach(params, outwardNode)
 
-  val BwRegulator = None
+  val memTrafficControl = None
 }
