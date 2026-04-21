@@ -190,21 +190,21 @@ trait CanAttachTile {
     connectInputConstants(domain, context)
     connectTrace(domain, context)
 
-    connectBwRegPorts(domain, context)
+    // connectBwRegPorts(domain, context)
   }
 
   def connectBwRegPorts(domain: TilePRCIDomain[TileType], context: Attachable): Unit = {
     implicit val p = context.p
     val dataBus = context.locateTLBusWrapper(crossingParams.master.where)
 
-    dataBus.BwRegulator match {
-      case Some(bwReg) => {
-        domain.element.bwRegNode.get := bwReg.ioNode(domain.element.tileId)
-      }
-      case None =>
-        require(domain.element.bwRegNode.isEmpty,
-          "bwRegNode exists but BwRegulator does not")
-    }
+    // dataBus.BwRegulator match {
+    //   case Some(bwReg) => {
+    //     domain.element.bwRegNode.get := bwReg.ioNode(domain.element.tileId)
+    //   }
+    //   case None =>
+    //     require(domain.element.bwRegNode.isEmpty,
+    //       "bwRegNode exists but BwRegulator does not")
+    // }
 
     // dataBus.BwRegulator.get.coreAccessNode(domain.element.tileId) := domain.element.accessNode.get
   }
@@ -213,7 +213,7 @@ trait CanAttachTile {
     implicit val p = context.p
     val dataBus = context.locateTLBusWrapper(crossingParams.master.where)
     dataBus.coupleFrom(tileParams.baseName) { bus =>
-      dataBus.BwRegulator.get.adapterNode :=* crossingParams.master.injectNode(context) :=* domain.crossMasterPort(crossingParams.crossingType)
+      dataBus.memTrafficControl.get.adapterNode :=* crossingParams.master.injectNode(context) :=* domain.crossMasterPort(crossingParams.crossingType)
     }
   }
 
@@ -221,7 +221,7 @@ trait CanAttachTile {
     implicit val p = context.p
     val dataBus = context.locateTLBusWrapper(crossingParams.master.where)
     dataBus.coupleFrom(tileParams.baseName) { bus =>
-      bus :=* dataBus.BwRegulator.get.adapterNode
+      bus :=* dataBus.memTrafficControl.get.adapterNode
     }
   }
 

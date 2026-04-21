@@ -45,10 +45,10 @@ class SystemBus(params: SystemBusParams, name: String = "system_bus")(implicit p
   }
 
 
-  val BwRegulator = p(BRUKey) match {
-    case Some(params) => {
-      Some(LazyModule(new BwRegulator(params)(p)))
-    }
+  val memTrafficControl = p(MTCKey) match {
+    case Some(params: PerBankDRAMParams) => Some(LazyModule(new PerBankDRAM(params)(p)))
+    case Some(params: AllBankDRAMParams) => Some(LazyModule(new AllBankDRAM(params)(p)))
+    case Some(params: MlpControlParams)  => Some(LazyModule(new MlpController(params)(p)))
     case None => None
   }
 
