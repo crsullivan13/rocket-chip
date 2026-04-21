@@ -45,9 +45,10 @@ class SystemBus(params: SystemBusParams, name: String = "system_bus")(implicit p
   }
 
   val memTrafficControl = p(MTCKey) match {
-    case Some(params: PerBankDRAMParams) => Some(LazyModule(new PerBankDRAM(params)(p)))
-    case Some(params: AllBankDRAMParams) => Some(LazyModule(new AllBankDRAM(params)(p)))
-    case Some(params: MlpControlParams)  => Some(LazyModule(new MlpController(params)(p)))
+    case Some(params: PerBankBwParams) => Some(LazyModule(new PerBankLLC(params)(p)))
+    // case Some(params: PerBankDRAMParams) => Some(LazyModule(new PerBankDRAM(params)(p)))
+    // case Some(params: AllBankDRAMParams) => Some(LazyModule(new AllBankDRAM(params)(p)))
+    // case Some(params: MlpControlParams)  => Some(LazyModule(new MlpController(params)(p)))
     case None => None
   }
 
