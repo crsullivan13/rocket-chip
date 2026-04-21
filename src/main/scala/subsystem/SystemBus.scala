@@ -44,7 +44,6 @@ class SystemBus(params: SystemBusParams, name: String = "system_bus")(implicit p
     addressPrefixNexusNode
   }
 
-
   val memTrafficControl = p(MTCKey) match {
     case Some(params: PerBankDRAMParams) => Some(LazyModule(new PerBankDRAM(params)(p)))
     case Some(params: AllBankDRAMParams) => Some(LazyModule(new AllBankDRAM(params)(p)))
