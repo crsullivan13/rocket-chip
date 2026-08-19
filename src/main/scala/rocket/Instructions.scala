@@ -928,6 +928,7 @@ object CSRs {
   val sireg = 0x151
   val stopei = 0x15c
   val satp = 0x180
+  val srmcfg = 0x181
   val scontext = 0x5a8
   val vsstatus = 0x200
   val vsie = 0x204

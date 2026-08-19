@@ -439,6 +439,8 @@ class TLBroadcastTracker(id: Int, lineBytes: Int, caches: Int, bufferless: Boole
   val echo    = Reg(chiselTypeOf(io.in_a.bits.echo))
   val address = RegInit((id << lineShift).U(io.in_a.bits.address.getWidth.W))
   val count   = Reg(UInt(log2Ceil(caches+1).W))
+  val rcid    = Reg(chiselTypeOf(io.in_a.bits.rcid))
+  val mcid    = Reg(chiselTypeOf(io.in_a.bits.mcid))
   val cacheOH = Reg(UInt(caches.W))
   val idle    = got_e && sent_d
 
@@ -455,6 +457,8 @@ class TLBroadcastTracker(id: Int, lineBytes: Int, caches: Int, bufferless: Boole
     echo   :<= io.in_a.bits.echo
     address := io.in_a.bits.address
     count   := 1.U
+    rcid    := io.in_a.bits.rcid
+    mcid    := io.in_a.bits.mcid
   }
 
   cacheOH := cacheOH & ~io.clearOH
@@ -512,6 +516,8 @@ class TLBroadcastTracker(id: Int, lineBytes: Int, caches: Int, bufferless: Boole
   io.out_a.bits.corrupt := false.B
   io.out_a.bits.user   :<= user
   io.out_a.bits.echo   :<= echo
+  io.out_a.bits.rcid    := rcid
+  io.out_a.bits.mcid    := mcid
 }
 
 object TLBroadcastConstants

@@ -306,6 +306,7 @@ class CSRFileIO(hasBeu: Boolean)(implicit p: Parameters) extends CoreBundle
   val mcontext = Output(UInt(coreParams.mcontextWidth.W))
   val scontext = Output(UInt(coreParams.scontextWidth.W))
   val fiom = Output(Bool())
+  val srmcfg = Output(UInt(64.W))
 
   val vector = usingVector.option(new Bundle {
     val vconfig = Output(new VConfig())
@@ -573,6 +574,12 @@ class CSRFile(
   val reg_sscratch = Reg(Bits(xLen.W))
   val reg_stvec = Reg(UInt((if (usingHypervisor) vaddrBitsExtended else vaddrBits).W))
   val reg_satp = Reg(new PTBR)
+  val reg_srmcfg = usingCBQRI.option(Reg(UInt(64.W)))
+  if (usingCBQRI) {
+    io.srmcfg := reg_srmcfg.get
+  } else {
+    io.srmcfg := 0.U
+  }
   val reg_wfi = withClock(io.ungated_clock) { RegInit(false.B) }
 
   val reg_fflags = Reg(UInt(5.W))
@@ -692,6 +699,11 @@ class CSRFile(
     usingFPU.option(CSRs.fflags -> reg_fflags) ++
     usingFPU.option(CSRs.frm -> reg_frm) ++
     (usingFPU || usingVector).option(CSRs.fcsr -> read_fcsr)
+
+  val srmcfg_csr = if (!usingCBQRI) LinkedHashMap() else LinkedHashMap[Int, Bits](
+    CSRs.srmcfg -> reg_srmcfg.get
+  )
+  read_mapping ++= srmcfg_csr
 
   val read_vcsr = Cat(reg_vxrm.getOrElse(0.U), reg_vxsat.getOrElse(0.U))
   val vector_csrs = if (!usingVector) LinkedHashMap() else LinkedHashMap[Int,Bits](
@@ -1524,6 +1536,9 @@ class CSRFile(
         reg_vxsat.get := wdata
         reg_vxrm.get := wdata >> 1
       }
+    }
+    if (usingCBQRI) {
+      when (decoded_addr(CSRs.srmcfg)) { reg_srmcfg.get := wdata }
     }
   }
 

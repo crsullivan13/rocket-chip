@@ -23,7 +23,7 @@ import freechips.rocketchip.prci.{
 }
 import freechips.rocketchip.subsystem.{
   HasTileLinkLocations, CanConnectWithinContextThatHasTileLinkLocations,
-  CanInstantiateWithinContextThatHasTileLinkLocations
+  CanInstantiateWithinContextThatHasTileLinkLocations, CanHaveMemTrafficControl
 }
 import freechips.rocketchip.util.Location
 
@@ -48,6 +48,7 @@ abstract class TLBusWrapper(params: HasTLBusParams, val busName: String)(implici
     extends ClockDomain
     with HasTLBusParams
     with CanHaveBuiltInDevices
+    with CanHaveMemTrafficControl
 {
   private val clockGroupAggregator = LazyModule(new ClockGroupAggregator(busName){ override def shouldBeInlined = true }).suggestName(busName + "_clock_groups")
   private val clockGroup = LazyModule(new ClockGroup(busName){ override def shouldBeInlined = true })

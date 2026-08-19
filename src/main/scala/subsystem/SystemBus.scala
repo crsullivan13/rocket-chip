@@ -44,6 +44,11 @@ class SystemBus(params: SystemBusParams, name: String = "system_bus")(implicit p
     addressPrefixNexusNode
   }
 
+  override val memTrafficControl = p(MTCKey) match {
+    case Some(params: PerBankBwParams) => Some(LazyModule(new PerBankLLC(params)(p)))
+    case None => None
+  }
+
   private val system_bus_xbar = LazyModule(new TLXbar(policy = params.policy, nameSuffix = Some(name)))
   val inwardNode: TLInwardNode = system_bus_xbar.node :=* TLFIFOFixer(TLFIFOFixer.allVolatile) :=* replicator.map(_.node).getOrElse(TLTempNode())
   val outwardNode: TLOutwardNode = system_bus_xbar.node
