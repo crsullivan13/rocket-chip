@@ -11,3 +11,7 @@
 	path = dependencies/diplomacy
 	url = https://github.com/chipsalliance/diplomacy.git
 	branch = master
+[submodule "src/main/scala/subsystem/memory-traffic-controllers"]
+	path = src/main/scala/subsystem/memory-traffic-controllers
+	url = git@github.com:crsullivan13/memory-traffic-controllers.git
+	branch = cbqri
