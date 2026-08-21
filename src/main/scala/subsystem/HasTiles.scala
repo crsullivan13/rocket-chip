@@ -177,6 +177,35 @@ trait CanAttachTile {
     connectTrace(domain, context)
   }
 
+  def connectBwReg(domain: TilePRCIDomain[TileType], context: TileContextType, isLast: Boolean): Unit = {
+    connectTileToBwReg(domain, context)
+    if (isLast) {
+      connectBwRegToBus(domain, context)
+    }
+    connectSlavePorts(domain, context)
+    connectInterrupts(domain, context)
+    connectPRC(domain, context)
+    connectOutputNotifications(domain, context)
+    connectInputConstants(domain, context)
+    connectTrace(domain, context)
+  }
+
+  def connectTileToBwReg(domain: TilePRCIDomain[TileType], context: Attachable): Unit = {
+    implicit val p = context.p
+    val dataBus = context.locateTLBusWrapper(crossingParams.master.where)
+    dataBus.coupleFrom(tileParams.baseName) { bus =>
+      dataBus.memTrafficControl.get.adapterNode :=* crossingParams.master.injectNode(context) :=* domain.crossMasterPort(crossingParams.crossingType)
+    }
+  }
+
+  def connectBwRegToBus(domain: TilePRCIDomain[TileType], context: Attachable): Unit = {
+    implicit val p = context.p
+    val dataBus = context.locateTLBusWrapper(crossingParams.master.where)
+    dataBus.coupleFrom(tileParams.baseName) { bus =>
+      bus :=* dataBus.memTrafficControl.get.adapterNode
+    }
+  }
+
   /** Connect the port where the tile is the master to a TileLink interconnect. */
   def connectMasterPorts(domain: TilePRCIDomain[TileType], context: Attachable): Unit = {
     implicit val p = context.p

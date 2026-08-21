@@ -118,9 +118,15 @@ trait HasHierarchicalElements extends DefaultHierarchicalElementContextType
 { this: LazyModule with Attachable with InstantiatesHierarchicalElements =>
   implicit val p: Parameters
 
+  var tileCount = 1
   // connect all the tiles to interconnect attachment points made available in this subsystem context
   tileAttachParams.foreach { params =>
-    params.connect(tile_prci_domains(params.tileParams.tileId).asInstanceOf[TilePRCIDomain[params.TileType]], this.asInstanceOf[params.TileContextType])
+    if (params.tileParams.baseName == "boom_tile") {
+      params.connectBwReg(tile_prci_domains(params.tileParams.tileId).asInstanceOf[TilePRCIDomain[params.TileType]], this.asInstanceOf[params.TileContextType], tileCount == tileAttachParams.length)
+    } else {
+      params.connect(tile_prci_domains(params.tileParams.tileId).asInstanceOf[TilePRCIDomain[params.TileType]], this.asInstanceOf[params.TileContextType])
+    }
+    tileCount = tileCount + 1
   }
   clusterAttachParams.foreach { params =>
     params.connect(cluster_prci_domains(params.clusterParams.clusterId).asInstanceOf[ClusterPRCIDomain[params.ClusterType]], this.asInstanceOf[params.ClusterContextType])
