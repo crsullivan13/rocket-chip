@@ -46,6 +46,7 @@ class SystemBus(params: SystemBusParams, name: String = "system_bus")(implicit p
 
   override val memTrafficControl = p(MTCKey) match {
     case Some(params: PerBankBwParams) => Some(LazyModule(new PerBankLLC(params)(p)))
+    case Some(params: MlpControlParams) => Some(LazyModule(new MlpController(params)(p)))
     case None => None
   }
 
