@@ -72,7 +72,8 @@ trait CanHaveMasterAXI4MemPort { this: BaseSubsystem =>
           supportsWrite = TransferSizes(1, mbus.blockBytes),
           supportsRead  = TransferSizes(1, mbus.blockBytes),
           interleavedId = Some(0))), // slave does not interleave read responses
-        beatBytes = memPortParams.beatBytes)
+        beatBytes = memPortParams.beatBytes,
+        requestKeys = Seq(CBQRIKey))
     }
   }).toList.flatten)
 

@@ -344,8 +344,6 @@ class TLEdgeOut(
     require (manager.anySupportAcquireB, s"TileLink: No managers visible from this edge support Acquires, but one of these clients would try to request one: ${client.clients}")
     val legal = manager.supportsAcquireBFast(toAddress, lgSize)
     val a = Wire(new TLBundleA(bundle))
-    a.rcid    := 0.U
-    a.mcid    := 0.U
     a.opcode  := TLMessages.AcquireBlock
     a.param   := growPermissions
     a.size    := lgSize
@@ -363,8 +361,6 @@ class TLEdgeOut(
     require (manager.anySupportAcquireB, s"TileLink: No managers visible from this edge support Acquires, but one of these clients would try to request one: ${client.clients}")
     val legal = manager.supportsAcquireBFast(toAddress, lgSize)
     val a = Wire(new TLBundleA(bundle))
-    a.rcid    := 0.U
-    a.mcid    := 0.U 
     a.opcode  := TLMessages.AcquirePerm
     a.param   := growPermissions
     a.size    := lgSize
@@ -463,8 +459,6 @@ class TLEdgeOut(
     val legal = manager.supportsGetFast(toAddress, lgSize)
     val a = Wire(new TLBundleA(bundle))
     a.opcode  := TLMessages.Get
-    a.rcid    := 0.U
-    a.mcid    := 0.U
     a.param   := 0.U
     a.size    := lgSize
     a.source  := fromSource
@@ -485,8 +479,6 @@ class TLEdgeOut(
     val legal = manager.supportsPutFullFast(toAddress, lgSize)
     val a = Wire(new TLBundleA(bundle))
     a.opcode  := TLMessages.PutFullData
-    a.rcid    := 0.U
-    a.mcid    := 0.U
     a.param   := 0.U
     a.size    := lgSize
     a.source  := fromSource
@@ -507,8 +499,6 @@ class TLEdgeOut(
     val legal = manager.supportsPutPartialFast(toAddress, lgSize)
     val a = Wire(new TLBundleA(bundle))
     a.opcode  := TLMessages.PutPartialData
-    a.rcid    := 0.U
-    a.mcid    := 0.U
     a.param   := 0.U
     a.size    := lgSize
     a.source  := fromSource
@@ -526,8 +516,6 @@ class TLEdgeOut(
     val legal = manager.supportsArithmeticFast(toAddress, lgSize)
     val a = Wire(new TLBundleA(bundle))
     a.opcode  := TLMessages.ArithmeticData
-    a.rcid    := 0.U
-    a.mcid    := 0.U
     a.param   := atomic
     a.size    := lgSize
     a.source  := fromSource
@@ -545,8 +533,6 @@ class TLEdgeOut(
     val legal = manager.supportsLogicalFast(toAddress, lgSize)
     val a = Wire(new TLBundleA(bundle))
     a.opcode  := TLMessages.LogicalData
-    a.rcid    := 0.U
-    a.mcid    := 0.U
     a.param   := atomic
     a.size    := lgSize
     a.source  := fromSource
@@ -564,8 +550,6 @@ class TLEdgeOut(
     val legal = manager.supportsHintFast(toAddress, lgSize)
     val a = Wire(new TLBundleA(bundle))
     a.opcode  := TLMessages.Hint
-    a.rcid    := 0.U
-    a.mcid    := 0.U
     a.param   := param
     a.size    := lgSize
     a.source  := fromSource

@@ -161,7 +161,7 @@ object TLXbar
       val r = inputIdRanges(i)
 
       if (connectAIO(i).exists(x=>x)) {
-        in(i).a.bits.user := DontCare
+        in(i).a.bits.user.fields.foreach(f => f.setDataDefault(in(i).a.bits.user(f.key)))
         in(i).a.squeezeAll.waiveAll :<>= io_in(i).a.squeezeAll.waiveAll
         in(i).a.bits.source := io_in(i).a.bits.source | r.start.U
       } else {
@@ -182,7 +182,7 @@ object TLXbar
       }
 
       if (connectCIO(i).exists(x=>x)) {
-        in(i).c.bits.user := DontCare
+        in(i).c.bits.user.fields.foreach(f => f.setDataDefault(in(i).c.bits.user(f.key)))
         in(i).c.squeezeAll.waiveAll :<>= io_in(i).c.squeezeAll.waiveAll
         in(i).c.bits.source := io_in(i).c.bits.source | r.start.U
       } else {
@@ -218,7 +218,7 @@ object TLXbar
       val r = outputIdRanges(o)
 
       if (connectAOI(o).exists(x=>x)) {
-        out(o).a.bits.user := DontCare
+        out(o).a.bits.user.fields.foreach(f => f.setDataDefault(out(o).a.bits.user(f.key)))
         io_out(o).a.squeezeAll.waiveAll :<>= out(o).a.squeezeAll.waiveAll
       } else {
         out(o).a := DontCare
@@ -237,7 +237,7 @@ object TLXbar
       }
 
       if (connectCOI(o).exists(x=>x)) {
-        out(o).c.bits.user := DontCare
+        out(o).c.bits.user.fields.foreach(f => f.setDataDefault(out(o).c.bits.user(f.key)))
         io_out(o).c.squeezeAll.waiveAll :<>= out(o).c.squeezeAll.waiveAll
       } else {
         out(o).c  := DontCare
