@@ -17,3 +17,6 @@
 	branch = cbqri
 [submodule "src/main/scala/subsystem/memory-traffic-controllers/"]
 	url = https://github.com/crsullivan13/memory-traffic-controllers.git
+[submodule "src/main/scala/subsystem/MemBenchPress"]
+	path = src/main/scala/subsystem/MemBenchPress
+	url = git@github.com:crsullivan13/MemBenchPress.git
